@@ -1,26 +1,18 @@
 package onlytrade.app.login
 
-import io.ktor.server.request.receiveParameters
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
-import onlytrade.app.Greeting
+import io.ktor.server.routing.route
 
 
-fun Route.loginByMobile() {
-    post("/login") {
-        val params = call.receiveParameters()
-        val mobile = params["mobile"]
-        val pwd = params["pwd"]
-        call.respondText("Login Info: ${Greeting().greet()}")
+fun Route.login() = route("/login") {
+        post("/phone") {
+            call.respondText("Login with Phone: Success ;D")
+        }
+        post("/email") {
+            call.respondText("Login with Email: Success ;D")
+        }
     }
-}
 
-fun Route.loginByEmail() {
-    post("/login") {
-        val params = call.receiveParameters()
-        val email = params["email"]
-        val pwd = params["pwd"]
-        call.respondText("Login Info: ${Greeting().greet()}")
-    }
-}
+
