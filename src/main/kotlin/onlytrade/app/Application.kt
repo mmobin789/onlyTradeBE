@@ -3,6 +3,9 @@ package onlytrade.app
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.basic
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -29,6 +32,19 @@ fun Application.module() {
 
     }
     install(Resources)
+
+    install(Authentication) {
+        basic("login-auth") {
+            validate { credentials ->
+                // Validate credentials (username and password)
+                if (credentials.name.isNotBlank() && credentials.password.isNotBlank()) {
+                    UserIdPrincipal(credentials.name) // Return principal if valid
+                } else {
+                    null // Invalid credentials
+                }
+            }
+        }
+    }
 
     addTemplating()
 
