@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnlyTrade Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 25%;
+        }
+        .input-group {
+            margin-bottom: 15px;
+            margin-right:20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .or-label {
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .login-button {
+            width: 100%;
+            padding: 10px;
+            margin-top:20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .login-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <form id="loginForm">
+        <div class="input-group" id="emailGroup">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="Enter your email">
+            <div id="emailError" class="error hidden">Enter a valid email.</div>
+        </div>
+        <div class="or-label" id="orLabel">OR</div>
+        <div class="input-group" id="phoneGroup">
+            <label for="phone">Mobile Number (Pakistan only)</label>
+            <input type="tel" id="phone" placeholder="Enter your phone number">
+            <div id="phoneError" class="error hidden">Please enter a valid Pakistani phone number (e.g., 03XXXXXXXXX,+92XXXXXXXXX or 92XXXXXXXXX).</div>
+        </div>
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="Enter your password">
+            <div id="pwdError" class="error hidden">Password length must be 7 or more.</div>
+        </div>
+        <button type="submit" class="login-button">Login</button>
+    </form>
+</div>
+
+<script>
+    const emailInput = document.getElementById('email');
+    const phoneInput = document.getElementById('phone');
+    const emailGroup = document.getElementById('emailGroup');
+    const phoneGroup = document.getElementById('phoneGroup');
+    const orLabel = document.getElementById('orLabel');
+    const phoneError = document.getElementById('phoneError');
+    const emailError = document.getElementById('emailError');
+    const pwdError = document.getElementById('pwdError');
+    const loginForm = document.getElementById('loginForm');
+
+    // Function to toggle visibility of fields and OR label
+    function toggleFields() {
+        const hasEmail = emailInput.value.trim() !== '';
+        const hasPhone = phoneInput.value.trim() !== '';
+
+        if (hasEmail || hasPhone) {
+            orLabel.classList.add('hidden');
+            if (hasEmail) {
+                phoneGroup.classList.add('hidden');
+            } else {
+                phoneGroup.classList.remove('hidden');
+            }
+            if (hasPhone) {
+                emailGroup.classList.add('hidden');
+            } else {
+                emailGroup.classList.remove('hidden');
+            }
+        } else {
+            orLabel.classList.remove('hidden');
+            emailGroup.classList.remove('hidden');
+            phoneGroup.classList.remove('hidden');
+        }
+    }
+
+    // Event listeners for input fields
+    emailInput.addEventListener('input', toggleFields);
+    phoneInput.addEventListener('input', toggleFields);
+
+    // Validate Pakistani phone number
+    function validatePhoneNumber(phone) {
+        const regex = /^(03\d{9}|(\+92|92)\d{10})$/; // Matches 03XXXXXXXXX or 92XXXXXXXXX or +92XXXXXXXXXX
+        return regex.test(phone);
+    }
+    // Validate email
+    function validateEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    // Function to send data to the server
+    async function sendData(url, data) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('Success:', result);
+            alert('Login successful!');
+        } catch (error) {
+            console.error(error);
+            alert('Login failed. Please try again.');
+        }
+    }
+
+    // Form submission
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = emailInput.value.trim();
+        const phone = phoneInput.value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if(!email && !phone && !password)
+        {   alert('Please provide mobile or email with a password.');
+            return;
+        }
+
+        if(email && !validateEmail(email)) {
+            emailError.classList.remove('hidden');
+            return;
+        }
+        else {
+            emailError.classList.add('hidden');
+        }
+
+        if (phone && !validatePhoneNumber(phone)) {
+            phoneError.classList.remove('hidden');
+            return;
+        } else {
+            phoneError.classList.add('hidden');
+        }
+
+        // Validate password
+        if (password.length < 7) {
+            pwdError.classList.remove('hidden');
+            return;
+        } else {
+            pwdError.classList.add('hidden');
+        }
+
+        // Prepare data for the API
+        const data = { password };
+
+        if (email) {
+            data.email = email;
+            await sendData('http://127.0.0.1:8080/login/email', data);
+        } else if (phone) {
+            data.phone = phone;
+            await sendData('http://127.0.0.1:8080/login/phone', data);
+        } else {
+            alert('Please enter either an email or a phone number.');
+        }
+    });
+</script>
+</body>
+</html>

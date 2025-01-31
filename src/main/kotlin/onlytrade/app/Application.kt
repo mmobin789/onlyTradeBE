@@ -9,9 +9,8 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.resources.Resources
 import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
-import onlytrade.app.login.login
+import onlytrade.app.login.routing.addRouting
+import onlytrade.app.login.templating.addTemplating
 
 
 fun main() {
@@ -31,13 +30,9 @@ fun Application.module() {
     }
     install(Resources)
 
+    addTemplating()
 
-    routing {
-        get ("/") { //todo remove
-            call.respondText("Hello World! Locally!")
-        }
-     login()
+    addRouting()
 
-    }
 
 }

@@ -24,6 +24,7 @@ dependencies {
     implementation(libs.ktor.server.resources)
     implementation(libs.ktor.server.status.pages)
     implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.thymeleaf.jvm)
     testImplementation(libs.ktor.server.test.host.jvm)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.ktor.client.content.negotiation.jvm)
