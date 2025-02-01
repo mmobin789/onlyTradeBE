@@ -12,6 +12,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.resources.Resources
 import io.ktor.server.response.respondText
+import onlytrade.app.db.configureDatabases
 import onlytrade.app.login.routing.addRouting
 import onlytrade.app.login.templating.addTemplating
 
@@ -49,6 +50,8 @@ fun Application.module() {
     addTemplating()
 
     addRouting()
+
+    configureDatabases()
 
 
 }

@@ -5,7 +5,6 @@ import io.ktor.server.http.content.staticResources
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
-import onlytrade.app.login.login
 
 fun Application.addRouting() {
     routing {
