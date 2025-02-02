@@ -14,16 +14,17 @@ import onlytrade.app.viewmodel.login.repository.data.remote.model.response.Login
 fun Route.login() = authenticate("login-auth") {
     post("login/phone") {
         call.principal<UserIdPrincipal>()?.also {
-            call.respond(LoginResponse("Login with Phone: Success ;D"))
-            UserRepository.addUserByPhone(phone = it.name)
+            val phone = UserRepository.addUserByPhone(phone = it.name).phone
+            call.respond(LoginResponse("Login success with Phone: $phone"))
+
         } ?: also {
             call.respond(HttpStatusCode.Unauthorized)
         }
     }
     post("login/email") {
         call.principal<UserIdPrincipal>()?.also {
-            call.respond(LoginResponse("Login with Email: Success ;D"))
-            UserRepository.addUserByEmail(email = it.name)
+            val email = UserRepository.addUserByEmail(email = it.name).email
+            call.respond(LoginResponse("Login success with Email: $email"))
         } ?: also {
             call.respond(HttpStatusCode.Unauthorized)
         }

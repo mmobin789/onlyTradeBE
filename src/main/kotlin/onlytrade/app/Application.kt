@@ -46,12 +46,13 @@ fun Application.module() {
             }
         }
     }
+    configureDatabases()
 
     addTemplating()
 
     addRouting()
 
-    configureDatabases()
+
 
 
 }

@@ -1,12 +1,24 @@
 package onlytrade.app.db
 
-import io.ktor.server.application.Application
+import kotlinx.coroutines.Dispatchers
+import onlytrade.app.login.data.user.table.UserTable
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.Transaction
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.transaction
 
-fun Application.configureDatabases() {
+fun configureDatabases() {
     Database.connect(
-        "jdbc:postgresql://localhost:5432/onlyTrade_db",
+        "jdbc:postgresql://localhost:5432/ot_dev",
         user = "postgres",
-        password = "password"
+        password = "1994"
     )
+
+    transaction {
+        SchemaUtils.create(UserTable)
+    }
 }
+
+suspend fun <T> suspendTransaction(block: Transaction.() -> T): T =
+    newSuspendedTransaction(Dispatchers.IO, statement = block)
