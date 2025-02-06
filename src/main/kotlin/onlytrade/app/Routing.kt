@@ -1,10 +1,11 @@
-package onlytrade.app.login.routing
+package onlytrade.app
 
 import io.ktor.server.application.Application
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
+import onlytrade.app.login.route.login
 
 fun Application.addRouting() {
     routing {

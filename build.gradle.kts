@@ -10,9 +10,15 @@ version = "1.0.0"
 application {
     mainClass.set("onlytrade.app.ApplicationKt")
     applicationDefaultJvmArgs =
-        listOf("-Dio.ktor.development=${extra["io.ktor.development"] ?: "false"}")
+        listOf("-Dio.ktor.development=${extra["io.ktor.development"] ?: "true"}")
 }
-
+val osName = System.getProperty("os.name").lowercase()
+val tcnative_classifier = when {
+    osName.contains("win") -> "windows-x86_64"
+    osName.contains("linux") -> "linux-x86_64"
+    osName.contains("mac") -> "osx-x86_64"
+    else -> null
+}
 dependencies {
     implementation(projects.onlyTradeBusiness)
     implementation(libs.logback)
@@ -23,13 +29,29 @@ dependencies {
     implementation(libs.ktor.server.content.negotiation.jvm)
     implementation(libs.ktor.server.resources)
     implementation(libs.ktor.server.status.pages)
+    implementation(libs.ktor.server.request.validation)
+    implementation(libs.ktor.server.rate.limit)
     implementation(libs.ktor.server.auth)
+    implementation(libs.ktor.server.auth.jwt)
+    implementation(libs.ktor.server.sessions)
+    implementation(libs.ktor.server.config.yaml)
+    implementation(libs.ktor.server.html.builder)
+    implementation(libs.ktor.network.tls.certificates)
+    implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.server.thymeleaf.jvm)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.dao)
     implementation(libs.h2)
     implementation(libs.postgresql)
+   // implementation(libs.kotlin.css)
+
+    if (tcnative_classifier != null) {
+        implementation("io.netty:netty-tcnative-boringssl-static:2.0.69.Final:$tcnative_classifier")
+    } else {
+        implementation("io.netty:netty-tcnative-boringssl-static:2.0.69.Final")
+    }
+
     testImplementation(libs.ktor.server.test.host.jvm)
     testImplementation(libs.kotlin.test.junit)
     testImplementation(libs.ktor.client.content.negotiation.jvm)
