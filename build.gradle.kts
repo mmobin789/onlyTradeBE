@@ -19,6 +19,12 @@ val tcnative_classifier = when {
     osName.contains("mac") -> "osx-x86_64"
     else -> null
 }
+
+/*ktor { // to create a fat jar with custom name.
+    fatJar {
+        archiveFileName.set("OT-BE.jar")
+    }
+}*/
 dependencies {
     implementation(projects.onlyTradeBusiness)
     implementation(libs.logback)
