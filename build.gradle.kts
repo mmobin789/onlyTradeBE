@@ -25,6 +25,29 @@ val tcnative_classifier = when {
         archiveFileName.set("OT-BE.jar")
     }
 }*/
+
+ktor {
+    docker {
+        localImageName.set("OTBE-docker-image")
+        imageTag.set("0.0.1-preview")
+        jreVersion.set(JavaVersion.VERSION_17)
+        portMappings.set(listOf(
+            io.ktor.plugin.features.DockerPortMapping(
+                80,
+                8080,
+                io.ktor.plugin.features.DockerPortMappingProtocol.TCP
+            )
+        ))
+
+        externalRegistry.set(
+            io.ktor.plugin.features.DockerImageRegistry.dockerHub(
+                appName = provider { "ktor-app" },
+                username = providers.environmentVariable("DOCKER_HUB_USERNAME"), //mmobin789
+                password = providers.environmentVariable("DOCKER_HUB_PASSWORD") //1994
+            )
+        )
+    }
+}
 dependencies {
     implementation(projects.onlyTradeBusiness)
     implementation(libs.logback)
