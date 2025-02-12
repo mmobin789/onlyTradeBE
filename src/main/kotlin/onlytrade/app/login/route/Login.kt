@@ -11,7 +11,7 @@ import io.ktor.server.sessions.sessions
 import io.ktor.server.sessions.set
 import onlytrade.app.login.data.UserRepository
 import onlytrade.app.login.session.UserSession
-import onlytrade.app.viewmodel.login.repository.data.remote.model.response.LoginResponse
+import onlytrade.app.login.data.response.LoginResponse
 
 
 fun Route.login() = authenticate("login-auth") {

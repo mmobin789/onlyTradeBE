@@ -49,7 +49,6 @@ ktor {
     }
 }
 dependencies {
-    implementation(projects.onlyTradeBusiness)
     implementation(libs.logback)
     implementation(libs.ktor.server.core.jvm)
     implementation(libs.ktor.server.netty.jvm)
@@ -86,4 +85,8 @@ dependencies {
     testImplementation(libs.ktor.client.content.negotiation.jvm)
     testImplementation(libs.ktor.client.auth)
 
+}
+repositories {
+    mavenCentral()
+    google()
 }

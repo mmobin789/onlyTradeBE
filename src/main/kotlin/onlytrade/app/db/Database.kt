@@ -9,8 +9,9 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun configureDatabases() {
+    val dbUrl = System.getenv("DATABASE_URL") ?: "jdbc:postgresql://localhost:5432/ot_dev"
     Database.connect(
-        "jdbc:postgresql://localhost:5432/ot_dev",
+        url = dbUrl,
         user = "postgres",
         password = "1994"
     )
