@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: onlytrade-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1994
+      POSTGRES_DB: ot_dev
+    ports:
+      - "5432:5432"
+    networks:
+      - onlytrade-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: onlytrade-app
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: "jdbc:postgresql://postgres:5432/ot_dev"
+      DATABASE_USER: "postgres"
+      DATABASE_PASSWORD: "1994"
+    ports:
+      - "8080:8080"
+    networks:
+      - onlytrade-network
+
+networks:
+  onlytrade-network:
+    driver: bridge

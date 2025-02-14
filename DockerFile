@@ -1,32 +1,20 @@
 # Stage 1: Cache Gradle dependencies
 FROM gradle:latest AS cache
-RUN mkdir -p /home/gradle/cache_home
-ENV GRADLE_USER_HOME=/home/gradle/cache_home
-
 WORKDIR /home/gradle/app
-
-# ✅ Copy Gradle settings & repositories first
-COPY gradle/ /home/gradle/app/gradle/
-COPY gradle.properties settings.gradle.kts /home/gradle/app/
-COPY onlyTradeBE/build.gradle.kts /home/gradle/app/onlyTradeBE/
-
-# ✅ Ensure repositories are available before resolving dependencies
-RUN gradle --project-dir onlyTradeBE dependencies --no-daemon --refresh-dependencies --stacktrace
+COPY gradle/ gradle/
+COPY gradle.properties settings.gradle.kts build.gradle.kts ./
+RUN gradle --no-daemon dependencies
 
 # Stage 2: Build Application
 FROM gradle:latest AS build
-COPY --from=cache /home/gradle/cache_home /home/gradle/.gradle
+COPY --from=cache /home/gradle/.gradle /home/gradle/.gradle
 WORKDIR /home/gradle/app
-COPY . /home/gradle/app/
+COPY . .
+RUN gradle buildFatJar --no-daemon --stacktrace
 
-# ✅ Build the fat JAR
-RUN gradle --project-dir onlyTradeBE buildFatJar --no-daemon --stacktrace
-
-# Stage 3: Create the Runtime Image
-FROM amazoncorretto:22 AS runtime
-EXPOSE 8080
+# Stage 3: Runtime Image
+FROM amazoncorretto:22
 WORKDIR /app
-COPY --from=build /home/gradle/app/onlyTradeBE/build/libs/*.jar /app/ktor-app.jar
-
-# ✅ Run the Ktor app
+COPY --from=build /home/gradle/app/build/libs/*.jar /app/ktor-app.jar
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "/app/ktor-app.jar"]

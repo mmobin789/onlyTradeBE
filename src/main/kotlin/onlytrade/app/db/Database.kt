@@ -10,10 +10,12 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 fun configureDatabases() {
     val dbUrl = System.getenv("DATABASE_URL") ?: "jdbc:postgresql://localhost:5432/ot_dev"
+    val dbPwd = System.getenv("DATABASE_PASSWORD") ?: "1994"
+    val dbUser = System.getenv("DATABASE_USER") ?: "postgres"
     Database.connect(
         url = dbUrl,
-        user = "postgres",
-        password = "1994"
+        user = dbUser,
+        password = dbPwd
     )
 
     transaction {
