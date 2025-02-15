@@ -1,20 +1,29 @@
 # Stage 1: Cache Gradle dependencies
 FROM gradle:latest AS cache
+RUN mkdir -p /home/gradle/cache_home
+ENV GRADLE_USER_HOME=/home/gradle/cache_home
+
 WORKDIR /home/gradle/app
-COPY gradle/ gradle/
-COPY gradle.properties settings.gradle.kts build.gradle.kts ./
-RUN gradle --no-daemon dependencies
+
+# Copy necessary files to cache dependencies
+COPY gradle/ /home/gradle/app/gradle/
+COPY gradle.properties settings.gradle.kts /home/gradle/app/
+COPY build.gradle.kts /home/gradle/app/
+
+RUN gradle --project-dir . dependencies --no-daemon --refresh-dependencies --stacktrace
 
 # Stage 2: Build Application
 FROM gradle:latest AS build
-COPY --from=cache /home/gradle/.gradle /home/gradle/.gradle
+COPY --from=cache /home/gradle/cache_home /home/gradle/.gradle
 WORKDIR /home/gradle/app
-COPY . .
-RUN gradle buildFatJar --no-daemon --stacktrace
+COPY . /home/gradle/app/
 
-# Stage 3: Runtime Image
-FROM amazoncorretto:22
+RUN gradle --project-dir . buildFatJar --no-daemon --stacktrace
+
+# Stage 3: Run the Application
+FROM amazoncorretto:22 AS runtime
+EXPOSE 8080
 WORKDIR /app
 COPY --from=build /home/gradle/app/build/libs/*.jar /app/ktor-app.jar
-EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "/app/ktor-app.jar"]

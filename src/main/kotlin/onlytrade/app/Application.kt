@@ -20,6 +20,10 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.resources.Resources
 import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
+import io.ktor.server.sessions.SessionTransportTransformerEncrypt
+import io.ktor.server.sessions.Sessions
+import io.ktor.server.sessions.cookie
+import io.ktor.util.hex
 import onlytrade.app.db.configureDatabases
 import onlytrade.app.login.session.UserSession
 import onlytrade.app.login.templating.addTemplating
@@ -27,7 +31,6 @@ import java.io.File
 
 
 fun main() {
-
     embeddedServer(
         Netty,
         configure = {
@@ -40,6 +43,16 @@ fun main() {
 fun Application.module() {
 
     install(CallLogging)
+
+    install(Sessions) {
+        val secretEncryptKey = hex("00112233445566778899aabbccddeeff")
+        val secretSignKey = hex("6819b57a326945c1968f45236589")
+        cookie<UserSession>("user_session") {
+            cookie.path = "/"
+            cookie.maxAgeInSeconds = 180
+            transform(SessionTransportTransformerEncrypt(secretEncryptKey, secretSignKey))
+        }
+    }
 
     install(StatusPages) {
         exception<IllegalStateException> { call, cause ->

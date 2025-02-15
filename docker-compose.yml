@@ -1,5 +1,5 @@
-version: '3.8'
 services:
+  # PostgreSQL Database (Local Only)
   postgres:
     image: postgres:latest
     container_name: onlytrade-db
@@ -13,6 +13,7 @@ services:
     networks:
       - onlytrade-network
 
+  # Ktor Application
   app:
     build:
       context: .
@@ -21,7 +22,8 @@ services:
     depends_on:
       - postgres
     environment:
-      DATABASE_URL: "jdbc:postgresql://postgres:5432/ot_dev"
+      # Database config (Local defaults; AWS overrides with Elastic Beanstalk environment variables)
+      DATABASE_URL: "jdbc:postgresql://host.docker.internal:5432/ot_dev"
       DATABASE_USER: "postgres"
       DATABASE_PASSWORD: "1994"
     ports:
