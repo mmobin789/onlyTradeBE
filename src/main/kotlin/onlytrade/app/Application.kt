@@ -1,5 +1,6 @@
 package onlytrade.app
 
+import io.ktor.http.HttpHeaders
 import io.ktor.network.tls.certificates.buildKeyStore
 import io.ktor.network.tls.certificates.saveToFile
 import io.ktor.serialization.kotlinx.json.json
@@ -16,6 +17,7 @@ import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.resources.Resources
 import io.ktor.server.response.respondRedirect
@@ -23,10 +25,11 @@ import io.ktor.server.response.respondText
 import io.ktor.server.sessions.SessionTransportTransformerEncrypt
 import io.ktor.server.sessions.Sessions
 import io.ktor.server.sessions.cookie
+import io.ktor.server.thymeleaf.Thymeleaf
 import io.ktor.util.hex
 import onlytrade.app.db.configureDatabases
 import onlytrade.app.login.session.UserSession
-import onlytrade.app.login.templating.addTemplating
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import java.io.File
 
 
@@ -43,6 +46,17 @@ fun main() {
 fun Application.module() {
 
     install(CallLogging)
+
+    install(CORS) {
+        anyMethod()
+        allowHost("localhost:80")
+        allowHost("127.0.0.1:80")
+        allowCredentials = true
+        allowNonSimpleContentTypes = true
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Authorization)
+        allowHeader(HttpHeaders.AccessControlAllowOrigin)
+    }
 
     install(Sessions) {
         val secretEncryptKey = hex("00112233445566778899aabbccddeeff")
@@ -62,6 +76,15 @@ fun Application.module() {
     install(ContentNegotiation) {
         json()
 
+    }
+
+    // Install Thymeleaf plugin
+    install(Thymeleaf) {
+        setTemplateResolver(ClassLoaderTemplateResolver().apply {
+            prefix = "static/"
+            suffix = ".html"
+            characterEncoding = Charsets.UTF_8.name()
+        })
     }
     install(Resources)
 
@@ -95,8 +118,6 @@ fun Application.module() {
     }
     configureDatabases()
 
-    addTemplating()
-
     addRouting()
 }
 
@@ -112,7 +133,8 @@ private fun ApplicationEngine.Configuration.envConfig() { //todo
     keyStore.saveToFile(keyStoreFile, "123456")
 
     connector {
-        port = 8080
+        port = 80
+        host = "0.0.0.0"
     }
     sslConnector(
         keyStore = keyStore,

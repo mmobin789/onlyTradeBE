@@ -23,11 +23,14 @@ services:
       - postgres
     environment:
       # Database config (Local defaults; AWS overrides with Elastic Beanstalk environment variables)
-      DATABASE_URL: "jdbc:postgresql://host.docker.internal:5432/ot_dev"
-      DATABASE_USER: "postgres"
-      DATABASE_PASSWORD: "1994"
+     DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://onlytrade-db:5432/ot_dev}
+     DATABASE_USER: ${DATABASE_USER:-postgres}
+     DATABASE_PASSWORD: ${DATABASE_PASSWORD:-1994}
+     DEV_MODE: ${DEV_MODE:-1} #  Development/debugging mode enabled on 0 means local.
     ports:
-      - "8080:8080"
+      - "80:80"
+      - "8443:8443"
+    restart: always
     networks:
       - onlytrade-network
 

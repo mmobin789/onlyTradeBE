@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.ktor.network.tls.certificates)
     implementation(libs.ktor.server.call.logging)
     implementation(libs.ktor.server.thymeleaf.jvm)
+    implementation(libs.ktor.server.cors)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.exposed.dao)
