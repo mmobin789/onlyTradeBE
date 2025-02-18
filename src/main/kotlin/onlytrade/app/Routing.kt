@@ -3,7 +3,7 @@ package onlytrade.app
 import io.ktor.server.application.Application
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.response.respond
-import io.ktor.server.response.respondText
+import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.ktor.server.thymeleaf.ThymeleafContent
@@ -11,10 +11,10 @@ import onlytrade.app.login.data.ui.LoginUi
 import onlytrade.app.login.route.login
 
 fun Application.addRouting() {
-    val localEnv = (System.getenv("DEV_MODE") ?: "1") == "0" // change 1 to 0 as default value to enable local environment.
+    val localEnv = System.getenv("DEV_MODE") == "0" // change 1 to 0 as default value to enable local environment.
     routing {
-        get("/") { //todo remove
-            call.respondText("Welcome to OnlyTrade ;D")
+        get("/") {
+            call.respondRedirect("/login")
         }
         staticResources("/", "static")
 
