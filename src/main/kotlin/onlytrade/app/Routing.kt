@@ -18,9 +18,8 @@ fun Application.addRouting() {
         }
         staticResources("/", "static")
 
-        // Custom route for /login
+
         get("/login") {
-            // call.respondRedirect("/login.html")
             val loginUi = LoginUi(
                 loginEmailUrl = if (localEnv) "http://127.0.0.1:80/login/email" else "http://onlytrade.ap-south-1.elasticbeanstalk.com/login/email",
                 loginPhoneUrl = if (localEnv) "http://127.0.0.1:80/login/phone" else "http://onlytrade.ap-south-1.elasticbeanstalk.com/login/phone",

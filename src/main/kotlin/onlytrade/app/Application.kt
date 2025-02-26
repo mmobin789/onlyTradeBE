@@ -51,6 +51,9 @@ fun Application.module() {
         anyMethod()
         allowHost("localhost:80")
         allowHost("127.0.0.1:80")
+        allowHost("onlytrade.ap-south-1.elasticbeanstalk.com/")
+        allowHost("www.onlytrade.co")
+        allowHost("onlytrade.co")
         allowCredentials = true
         allowNonSimpleContentTypes = true
         allowHeader(HttpHeaders.ContentType)

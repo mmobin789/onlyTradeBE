@@ -154,16 +154,18 @@
                 body: JSON.stringify(data),
             });
 
-            if (!response.ok) {
+            if (response.status > 310) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
             const result = await response.json();
             console.log('Success:', result);
             alert('Login successful!');
+            alert(JSON.stringify(result));
         } catch (error) {
             console.error(error);
             alert('Login failed. Please try again.');
+            alert(error)
         }
     }
 

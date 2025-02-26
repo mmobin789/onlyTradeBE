@@ -13,5 +13,6 @@ class UserDAO(id: EntityID<Int>) : IntEntity(id) {
     var email by UserTable.email
     var phone by UserTable.phone
     var verified by UserTable.verified
+    var loggedIn by UserTable.loggedIn
 
 }

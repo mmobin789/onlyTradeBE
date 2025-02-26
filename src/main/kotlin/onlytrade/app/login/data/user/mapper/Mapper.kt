@@ -9,4 +9,5 @@ fun UserDAO.toModel(): User = User(
     phone = phone,
     email = email,
     verified = verified == "true",
+    loggedIn = loggedIn == "true"
 )
