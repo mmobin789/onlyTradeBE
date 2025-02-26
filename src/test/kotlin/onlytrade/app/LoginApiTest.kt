@@ -11,7 +11,7 @@ import io.ktor.http.contentType
 import io.ktor.http.withCharset
 import io.ktor.server.testing.testApplication
 import kotlinx.serialization.json.Json
-import onlytrade.app.login.data.response.LoginResponse
+import onlytrade.app.viewmodel.login.repository.data.remote.model.response.LoginResponse
 import java.util.UUID
 import kotlin.random.Random
 import kotlin.test.Test
