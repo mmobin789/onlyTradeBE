@@ -1,0 +1,39 @@
+services:
+  # PostgreSQL Database (Local Only)
+  postgres:
+    image: postgres:latest
+    container_name: onlytrade-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1994
+      POSTGRES_DB: ot_dev
+    ports:
+      - "5432:5432"
+    networks:
+      - onlytrade-network
+
+  # Ktor Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: onlytrade-app
+    depends_on:
+      - postgres
+    environment:
+      # Database config (Local defaults; AWS overrides with Elastic Beanstalk environment variables)
+     DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://onlytrade-db:5432/ot_dev}
+     DATABASE_USER: ${DATABASE_USER:-postgres}
+     DATABASE_PASSWORD: ${DATABASE_PASSWORD:-1994}
+     DEV_MODE: ${DEV_MODE:-0} #  Development/debugging mode enabled on 0 means local.
+    ports:
+      - "80:80"
+      - "8443:8443"
+    restart: always
+    networks:
+      - onlytrade-network
+
+networks:
+  onlytrade-network:
+    driver: bridge
