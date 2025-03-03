@@ -6,17 +6,13 @@ import aws.sdk.kotlin.services.s3.model.DeleteObjectRequest
 import aws.sdk.kotlin.services.s3.model.GetObjectRequest
 import aws.sdk.kotlin.services.s3.model.PutObjectRequest
 import aws.smithy.kotlin.runtime.content.ByteStream
-import aws.smithy.kotlin.runtime.content.fromFile
 import aws.smithy.kotlin.runtime.content.toByteArray
-import java.io.File
 
 object ImageUploadService {
     private val s3Client = S3Client {
         region = "ap-south-1"
         credentialsProvider = StaticCredentialsProvider {
-            // accountId= "879381256721"
-            accessKeyId = "AKIA4ZPZVDII3IHRMLO3"
-            secretAccessKey = "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"
+
         }
     } // Change region accordingly
 
