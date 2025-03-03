@@ -9,7 +9,6 @@ import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.basic
-import io.ktor.server.auth.session
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
@@ -20,15 +19,10 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.resources.Resources
-import io.ktor.server.response.respondRedirect
 import io.ktor.server.response.respondText
-import io.ktor.server.sessions.SessionTransportTransformerEncrypt
-import io.ktor.server.sessions.Sessions
-import io.ktor.server.sessions.cookie
 import io.ktor.server.thymeleaf.Thymeleaf
-import io.ktor.util.hex
 import onlytrade.app.db.configureDatabases
-import onlytrade.app.login.session.UserSession
+import onlytrade.app.login.data.LoginConst
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 import java.io.File
 
@@ -61,15 +55,15 @@ fun Application.module() {
         allowHeader(HttpHeaders.AccessControlAllowOrigin)
     }
 
-    install(Sessions) {
-        val secretEncryptKey = hex("00112233445566778899aabbccddeeff")
-        val secretSignKey = hex("6819b57a326945c1968f45236589")
-        cookie<UserSession>("user_session") {
-            cookie.path = "/"
-            cookie.maxAgeInSeconds = 180
-            transform(SessionTransportTransformerEncrypt(secretEncryptKey, secretSignKey))
-        }
-    }
+    /*  install(Sessions) {
+          val secretEncryptKey = hex("00112233445566778899aabbccddeeff")
+          val secretSignKey = hex("6819b57a326945c1968f45236589")
+          cookie<UserSession>("user_session") {
+              cookie.path = "/"
+              cookie.maxAgeInSeconds = 180
+              transform(SessionTransportTransformerEncrypt(secretEncryptKey, secretSignKey))
+          }
+      }*/
 
     install(StatusPages) {
         exception<IllegalStateException> { call, cause ->
@@ -92,7 +86,7 @@ fun Application.module() {
     install(Resources)
 
     install(Authentication) {
-        basic("login-auth") {
+        basic(LoginConst.BASIC_AUTH) {
             validate { credentials ->
                 // Validate credentials (username and password)
                 if (credentials.name.isNotBlank() && credentials.password.isNotBlank()) {
@@ -102,18 +96,18 @@ fun Application.module() {
                 }
             }
         }
-        session<UserSession>("auth-session") {
-            validate { session ->
-                if (session.name.startsWith("jet")) {
-                    session
-                } else {
-                    null
-                }
-            }
-            challenge {
-                call.respondRedirect("/login") // user will need to login again at this point.
-            }
-        }
+        /*   session<UserSession>("auth-session") {
+               validate { session ->
+                   if (session.name.startsWith("jet")) {
+                       session
+                   } else {
+                       null
+                   }
+               }
+               challenge {
+                   call.respondRedirect("/login") // user will need to login again at this point.
+               }
+           }*/
 
         //jwt {
         // Configure jwt authentication

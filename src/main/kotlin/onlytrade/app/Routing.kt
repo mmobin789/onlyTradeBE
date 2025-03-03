@@ -32,6 +32,5 @@ fun Application.addRouting() {
 
         // Static plugin. Try to access `/static/login.html`
 
-
     }
 }

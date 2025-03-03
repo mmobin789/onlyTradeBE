@@ -1,4 +1,4 @@
-package onlytrade.app.login.data
+package onlytrade.app.login.data.user
 
 import onlytrade.app.db.suspendTransaction
 import onlytrade.app.login.data.user.dao.UserDAO
