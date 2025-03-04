@@ -4,7 +4,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 
 
 object ProductTable : IntIdTable(name = "product") {
-    val uid = integer("uid")
+    val uid = integer("uid") //user id
     val name = text("name", )
     val description = text("desc")
     val estPrice = integer("estPrice")

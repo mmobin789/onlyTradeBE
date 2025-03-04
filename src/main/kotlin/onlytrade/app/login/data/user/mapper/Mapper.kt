@@ -8,6 +8,6 @@ fun UserDAO.toModel(): User = User(
     name = usersName,
     phone = phone,
     email = email,
-    verified = verified == "true",
-    loggedIn = loggedIn == "true"
+    verified = verified,
+    loggedIn = loggedIn
 )
