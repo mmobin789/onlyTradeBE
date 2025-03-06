@@ -8,16 +8,27 @@ import aws.sdk.kotlin.services.s3.model.PutObjectRequest
 import aws.smithy.kotlin.runtime.content.ByteStream
 import aws.smithy.kotlin.runtime.content.toByteArray
 
-object ImageUploadService {
+object AWSUploadServiceS3 {
+    private const val BUCKET = "elasticbeanstalk-ap-south-1-879381256721"
+    private const val REGION = "ap-south-1"
     private val s3Client = S3Client {
-        region = "ap-south-1"
+        region = REGION
         credentialsProvider = StaticCredentialsProvider {
 
         }
     } // Change region accordingly
 
+    fun getDevImageUrl(
+        userId: Int,
+        categoryId: Int,
+        productId: Int,
+        filename: String
+    ) =
+        "https://$BUCKET.s3.$REGION.amazonaws.com/otDevImages/$userId/$categoryId/products/$productId/$filename"
+
+
     suspend fun uploadFile(
-        bucketName: String = "elasticbeanstalk-ap-south-1-879381256721",
+        bucketName: String = BUCKET,
         key: String,
         byteArray: ByteArray
     ) {
@@ -25,12 +36,12 @@ object ImageUploadService {
             bucket = bucketName
             this.key = key
             body = ByteStream.fromBytes(byteArray)
-            contentType = "image/png"
+            contentType = "image/jpg"
         }
         s3Client.putObject(request)
     }
 
-    suspend fun downloadFile(bucketName: String, key: String): ByteArray? {
+    suspend fun downloadFile(bucketName: String = BUCKET, key: String): ByteArray? {
         val request = GetObjectRequest {
             this.bucket = bucketName
             this.key = key
@@ -41,7 +52,7 @@ object ImageUploadService {
 
     }
 
-    suspend fun deleteFile(bucketName: String, key: String) {
+    suspend fun deleteFile(bucketName: String = BUCKET, key: String) {
         val request = DeleteObjectRequest {
             this.bucket = bucketName
             this.key = key

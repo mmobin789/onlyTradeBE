@@ -4,7 +4,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.application.log
 import kotlinx.coroutines.Dispatchers
 import onlytrade.app.login.data.user.table.UserTable
-import onlytrade.app.product.add.data.table.ProductTable
+import onlytrade.app.product.data.table.ProductTable
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Transaction
