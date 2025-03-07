@@ -41,7 +41,8 @@ fun Route.addProduct() = post("/product/add") {
 
         call.respond(
             HttpStatusCode.Processing, AddProductResponse(
-                msg = "Product added for review."
+                msg = "Product added for review.",
+                status = "" //todo
             )
         )
     }
