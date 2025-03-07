@@ -37,12 +37,17 @@ object ProductsRepository {
         }
 
     suspend fun addProduct(addProductRequest: AddProductRequest, uid: Int) = suspendTransaction {
-//todo
         dao.new {
             userId = uid
             name = addProductRequest.name
             description = addProductRequest.description
             estPrice = addProductRequest.estPrice
+        }
+    }
+
+    suspend fun setProductImages(id: Int, imageUrl: String) = suspendTransaction {
+        dao.findByIdAndUpdate(id) { product ->
+            product.imageUrls = imageUrl
         }
     }
 
