@@ -18,6 +18,7 @@ fun Route.addProduct() = post("/product/add") {
     call.principal<UserPrincipal>()?.run {
         val user = UserRepository.findUserByCredential(name)
         val multipart = call.receiveMultipart()
+        // Json.decodeFromString<AddProductRequest>()
         multipart.forEachPart { part ->
             if (part is PartData.FileItem) {
                 // fileName = part.originalFileName ?: "uploaded.jpg"
@@ -29,13 +30,20 @@ fun Route.addProduct() = post("/product/add") {
                    it.toByteReadChannel().copyTo(byteArrayOutputStream)*/
                     // val resource = this::class.java.classLoader?.getResource("static/test.png")?.readBytes()
                     //todo working here
-                    ///  ProductsRepository.addProduct(AddProductRequest(), user.id)
                     AWSUploadServiceS3.uploadFile(
                         key = "otDevImages/${user.id}/${789}/products/{}/{pid}", //todo
                         byteArray = it.readBytes()
                     )
                 }
             }
+            /* else if (part is PartData.FormItem) { // todo
+                     ProductsRepository.addProduct(AddProductRequest(
+                         name = ,
+                         desc = TODO(),
+                         price = TODO(),
+                         images = TODO()
+                     ), user.id)
+            }*/
             part.dispose()
         }
 
