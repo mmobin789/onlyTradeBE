@@ -9,6 +9,7 @@ class ProductDao(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<ProductDao>(ProductTable)
 
     var userId by ProductTable.userId
+    var subcategoryId by ProductTable.subcategoryId
     var name by ProductTable.name
     var estPrice by ProductTable.estPrice
     var description by ProductTable.description

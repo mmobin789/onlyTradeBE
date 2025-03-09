@@ -30,8 +30,10 @@ import java.io.File
 fun main() {
     embeddedServer(
         Netty,
-        configure = {
-            envConfig()
+        port = try {
+            System.getenv("PORT").toIntOrNull() ?: 80
+        } catch (e: NullPointerException) {
+            80
         },
         module = Application::module
     ).start(wait = true)
@@ -45,7 +47,7 @@ fun Application.module() {
         anyMethod()
         allowHost("localhost:80")
         allowHost("127.0.0.1:80")
-        allowHost("onlytrade.ap-south-1.elasticbeanstalk.com/")
+        allowHost("onlytrade-dev-9c057a85ddfa.herokuapp.com/")
         allowHost("www.onlytrade.co")
         allowHost("onlytrade.co")
         allowCredentials = true
@@ -116,31 +118,6 @@ fun Application.module() {
     configureDatabases()
 
     addRouting()
-}
-
-private fun ApplicationEngine.Configuration.envConfig() { //todo
-
-    val keyStoreFile = File("build/keystore.jks")
-    val keyStore = buildKeyStore {
-        certificate("sampleAlias") {
-            password = "foobar"
-            domains = listOf("127.0.0.1", "0.0.0.0", "localhost")
-        }
-    }
-    keyStore.saveToFile(keyStoreFile, "123456")
-
-    connector {
-        port = 80
-        host = "0.0.0.0"
-    }
-    sslConnector(
-        keyStore = keyStore,
-        keyAlias = "sampleAlias",
-        keyStorePassword = { "123456".toCharArray() },
-        privateKeyPassword = { "foobar".toCharArray() }) {
-        port = 8443
-        keyStorePath = keyStoreFile
-    }
 }
 
 /*

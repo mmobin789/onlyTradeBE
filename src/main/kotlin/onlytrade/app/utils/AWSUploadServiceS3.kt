@@ -18,16 +18,24 @@ object AWSUploadServiceS3 {
         }
     } // Change region accordingly
 
-    fun getDevImageUrl(
+    fun buildImageUrl(
         userId: Int,
         categoryId: Int,
         productId: Int,
-        filename: String
+        imageNo: Int
     ) =
-        "https://$BUCKET.s3.$REGION.amazonaws.com/otDevImages/$userId/$categoryId/products/$productId/$filename"
+        "https://$BUCKET.s3.$REGION.amazonaws.com/otDevImages/$userId/$categoryId/products/$productId/$imageNo"
 
+    fun buildImagePath(
+        userId: Int,
+        categoryId: Int,
+        productId: Int,
+        imageNo: Int
+    ) = "otDevImages/$userId/$categoryId/$productId/$imageNo"
 
-    suspend fun uploadFile(
+    suspend
+
+    fun uploadFile(
         bucketName: String = BUCKET,
         key: String,
         byteArray: ByteArray

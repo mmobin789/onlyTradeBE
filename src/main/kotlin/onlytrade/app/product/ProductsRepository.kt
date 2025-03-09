@@ -4,7 +4,7 @@ import onlytrade.app.db.suspendTransaction
 import onlytrade.app.product.data.dao.ProductDao
 import onlytrade.app.product.data.table.ProductTable
 import onlytrade.app.viewmodel.product.add.repository.data.db.Product
-import onlytrade.app.viewmodel.product.add.repository.data.remote.model.request.AddProductRequest
+import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.selectAll
 
@@ -26,6 +26,7 @@ object ProductsRepository {
             query.map { row ->
                 Product(
                     id = row[table.id].value,
+                    subcategoryId = row[table.subcategoryId],
                     userId = row[table.userId],
                     name = row[table.name],
                     description = row[table.description],
@@ -36,13 +37,17 @@ object ProductsRepository {
 
         }
 
-    suspend fun addProduct(addProductRequest: AddProductRequest, uid: Int) = suspendTransaction {
+    /**
+     * Returns the id of product on successful insertion.
+     */
+    suspend fun addProduct(userId: Int, addProductRequest: AddProductRequest) = suspendTransaction {
         dao.new {
-            userId = uid
+            this.userId = userId
+            subcategoryId = addProductRequest.subcategoryId
             name = addProductRequest.name
             description = addProductRequest.description
             estPrice = addProductRequest.estPrice
-        }
+        }.id.value
     }
 
     suspend fun setProductImages(id: Int, imageUrl: String) = suspendTransaction {

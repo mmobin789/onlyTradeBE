@@ -176,8 +176,8 @@
         const email = emailInput.value.trim();
         const phone = phoneInput.value.trim();
         const password = document.getElementById('password').value.trim();
-        let emailLoginUrl = /*[[${ui.loginEmailUrl}]]*/ '"http://onlytrade.ap-south-1.elasticbeanstalk.com/login/email"'
-        let phoneLoginUrl = /*[[${ui.loginPhoneUrl}]]*/ '"http://onlytrade.ap-south-1.elasticbeanstalk.com/login/phone"'
+        let emailLoginUrl = /*[[${ui.loginEmailUrl}]]*/ '"http://127.0.0.1:80/login/email"'
+        let phoneLoginUrl = /*[[${ui.loginPhoneUrl}]]*/ '"http://127.0.0.1:80/login/phone"'
 
         if(!email && !phone && !password)
         {   alert('Please provide mobile or email with a password.');

@@ -10,48 +10,80 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import onlytrade.app.login.data.user.UserRepository
+import onlytrade.app.product.ProductsRepository
 import onlytrade.app.utils.AWSUploadServiceS3
-import onlytrade.app.viewmodel.product.add.repository.data.remote.model.response.AddProductResponse
+import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
+import onlytrade.app.viewmodel.product.add.repository.data.remote.response.AddProductResponse
 
 fun Route.addProduct() = post("/product/add") {
     call.principal<UserPrincipal>()?.run {
         val user = UserRepository.findUserByCredential(name)
-        val multipart = call.receiveMultipart()
-        // Json.decodeFromString<AddProductRequest>()
-        multipart.forEachPart { part ->
-            if (part is PartData.FileItem) {
-                // fileName = part.originalFileName ?: "uploaded.jpg"
-                // Save the file to a folder
-                //  val file = File("uploads/$fileName")
-                part.provider().toInputStream().use {
+        var addProductRequest = AddProductRequest("", -1, "", -1.0)
 
-                    /*   val byteArrayOutputStream = ByteArrayOutputStream()
-                   it.toByteReadChannel().copyTo(byteArrayOutputStream)*/
-                    // val resource = this::class.java.classLoader?.getResource("static/test.png")?.readBytes()
-                    //todo working here
-                    AWSUploadServiceS3.uploadFile(
-                        key = "otDevImages/${user.id}/${789}/products/{}/{pid}", //todo
-                        byteArray = it.readBytes()
-                    )
+        withContext(Dispatchers.IO) {
+            val productImages = ArrayList<ByteArray>(15)
+            val multipart = call.receiveMultipart()
+            multipart.forEachPart { part ->
+                if (part is PartData.FileItem)
+                    part.provider().toInputStream().use {
+                        productImages.add(it.readBytes())
+
+                    }
+                else if (part is PartData.FormItem) {
+                    addProductRequest = when (part.name) {
+                        "subcategoryId" -> addProductRequest.copy(
+                            subcategoryId = part.value.toIntOrNull() ?: -1
+                        )
+
+                        "name" -> addProductRequest.copy(name = part.value)
+                        "estPrice" -> addProductRequest.copy(
+                            estPrice = part.value.toDoubleOrNull() ?: -1.0
+                        )
+
+                        else -> addProductRequest.copy(description = part.value)
+                    }
                 }
+                part.dispose()
             }
-            /* else if (part is PartData.FormItem) { // todo
-                     ProductsRepository.addProduct(AddProductRequest(
-                         name = ,
-                         desc = TODO(),
-                         price = TODO(),
-                         images = TODO()
-                     ), user.id)
-            }*/
-            part.dispose()
-        }
 
-        call.respond(
-            HttpStatusCode.Processing, AddProductResponse(
-                msg = "Product added for review.",
-                status = "" //todo
+
+            val productId = ProductsRepository.addProduct(
+                userId = user.id,
+                addProductRequest = addProductRequest
             )
-        )
+
+
+
+            productImages.forEachIndexed { index, bytes ->
+                val filepath = AWSUploadServiceS3.buildImagePath(
+                    userId = user.id,
+                    categoryId = addProductRequest.subcategoryId,
+                    productId = productId,
+                    imageNo = index + 1
+                )
+                AWSUploadServiceS3.uploadFile(
+                    key = filepath,
+                    byteArray = bytes
+                )
+
+                ProductsRepository.setProductImages(
+                    id = productId, imageUrl = AWSUploadServiceS3.buildImageUrl(
+                        userId = user.id,
+                        categoryId = addProductRequest.subcategoryId,
+                        productId = productId,
+                        imageNo = index + 1
+                    )
+                )
+
+            }
+            call.respond(
+                HttpStatusCode.Processing, AddProductResponse(
+                    msg = "Product added for review."
+                )
+            )
+        }
     }
 }

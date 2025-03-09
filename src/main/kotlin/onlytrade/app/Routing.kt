@@ -11,7 +11,7 @@ import onlytrade.app.login.data.ui.LoginUi
 import onlytrade.app.login.route.login
 
 fun Application.addRouting() {
-    val localEnv = System.getenv("DEV_MODE") == "0" // change 1 to 0 as default value to enable local environment.
+    val baseUrl = System.getenv("BASE_URL") ?: "http://127.0.0.1:80/"
     routing {
         get("/") {
             call.respondRedirect("/login")
@@ -21,8 +21,8 @@ fun Application.addRouting() {
 
         get("/login") {
             val loginUi = LoginUi(
-                loginEmailUrl = if (localEnv) "http://127.0.0.1:80/login/email" else "http://onlytrade.ap-south-1.elasticbeanstalk.com/login/email",
-                loginPhoneUrl = if (localEnv) "http://127.0.0.1:80/login/phone" else "http://onlytrade.ap-south-1.elasticbeanstalk.com/login/phone",
+                loginEmailUrl = "${baseUrl}login/email",
+                loginPhoneUrl = "${baseUrl}login/phone",
             )
 
             val uiData = mapOf("ui" to loginUi)
