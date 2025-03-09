@@ -1,18 +1,13 @@
 package onlytrade.app
 
 import io.ktor.http.HttpHeaders
-import io.ktor.network.tls.certificates.buildKeyStore
-import io.ktor.network.tls.certificates.saveToFile
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.basic
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.connector
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.engine.sslConnector
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.calllogging.CallLogging
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
@@ -24,7 +19,6 @@ import io.ktor.server.thymeleaf.Thymeleaf
 import onlytrade.app.db.configureDatabases
 import onlytrade.app.login.data.LoginConst
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
-import java.io.File
 
 
 fun main() {
