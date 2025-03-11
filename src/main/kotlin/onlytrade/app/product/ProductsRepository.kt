@@ -50,9 +50,9 @@ object ProductsRepository {
         }.id.value
     }
 
-    suspend fun setProductImages(id: Int, imageUrl: String) = suspendTransaction {
+    suspend fun setProductImages(id: Int, imageUrls: String) = suspendTransaction {
         dao.findByIdAndUpdate(id) { product ->
-            product.imageUrls = imageUrl
+            product.imageUrls = imageUrls
         }
     }
 

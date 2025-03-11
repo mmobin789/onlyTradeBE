@@ -56,6 +56,7 @@ fun Route.addProduct() = post("/product/add") {
             )
 
 
+            val urlsBuilder = StringBuilder(productImages.size)
 
             productImages.forEachIndexed { index, bytes ->
                 val filepath = AWSUploadServiceS3.buildImagePath(
@@ -69,16 +70,22 @@ fun Route.addProduct() = post("/product/add") {
                     byteArray = bytes
                 )
 
-                ProductsRepository.setProductImages(
-                    id = productId, imageUrl = AWSUploadServiceS3.buildImageUrl(
-                        userId = user.id,
-                        categoryId = addProductRequest.subcategoryId,
-                        productId = productId,
-                        imageNo = index + 1
-                    )
+                val url = AWSUploadServiceS3.buildImageUrl(
+                    userId = user.id,
+                    categoryId = addProductRequest.subcategoryId,
+                    productId = productId,
+                    imageNo = index + 1
                 )
 
+                urlsBuilder.append(url).also {
+                    if (index < productImages.lastIndex)
+                        it.append(",")
+                }
             }
+
+            ProductsRepository.setProductImages(
+                id = productId, imageUrls = urlsBuilder.toString()
+            )
             call.respond(
                 HttpStatusCode.Processing, AddProductResponse(
                     msg = "Product added for review."
