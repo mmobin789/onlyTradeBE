@@ -50,7 +50,7 @@ object ProductsRepository {
             estPrice = addProductRequest.estPrice
         }.id.value
 
-        val productImages = addProductRequest.productImages
+        val productImages = addProductRequest.productImages!!
 
         val urlsBuilder = StringBuilder(productImages.size)
 
