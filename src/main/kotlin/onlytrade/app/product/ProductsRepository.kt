@@ -3,6 +3,7 @@ package onlytrade.app.product
 import onlytrade.app.db.suspendTransaction
 import onlytrade.app.product.data.dao.ProductDao
 import onlytrade.app.product.data.table.ProductTable
+import onlytrade.app.utils.ImageUploadService
 import onlytrade.app.viewmodel.product.add.repository.data.db.Product
 import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -40,17 +41,50 @@ object ProductsRepository {
     /**
      * Returns the id of product on successful insertion.
      */
-    suspend fun addProduct(userId: Int, addProductRequest: AddProductRequest) = suspendTransaction {
-        dao.new {
+    suspend fun addProduct(userId: Int, addProductRequest: AddProductRequest): Int {
+        val productId = dao.new {
             this.userId = userId
             subcategoryId = addProductRequest.subcategoryId
             name = addProductRequest.name
             description = addProductRequest.description
             estPrice = addProductRequest.estPrice
         }.id.value
+
+        val productImages = addProductRequest.productImages
+
+        val urlsBuilder = StringBuilder(productImages.size)
+
+        productImages.forEachIndexed { index, bytes ->
+            val filepath = ImageUploadService.buildImagePath(
+                userId = userId,
+                categoryId = addProductRequest.subcategoryId,
+                productId = productId,
+                imageNo = index + 1
+            )
+            ImageUploadService.uploadFile(
+                key = filepath, byteArray = bytes
+            )
+
+            val url = ImageUploadService.buildImageUrl(
+                userId = userId,
+                categoryId = addProductRequest.subcategoryId,
+                productId = productId,
+                imageNo = index + 1
+            )
+
+            urlsBuilder.append(url).also {
+                if (index < productImages.lastIndex) it.append(",")
+            }
+        }
+
+        setProductImages(
+            id = productId, imageUrls = urlsBuilder.toString()
+        )
+
+        return productId
     }
 
-    suspend fun setProductImages(id: Int, imageUrls: String) = suspendTransaction {
+    private suspend fun setProductImages(id: Int, imageUrls: String) = suspendTransaction {
         dao.findByIdAndUpdate(id) { product ->
             product.imageUrls = imageUrls
         }

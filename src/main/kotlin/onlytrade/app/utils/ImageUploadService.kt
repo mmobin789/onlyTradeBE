@@ -8,7 +8,7 @@ import aws.sdk.kotlin.services.s3.model.PutObjectRequest
 import aws.smithy.kotlin.runtime.content.ByteStream
 import aws.smithy.kotlin.runtime.content.toByteArray
 
-object AWSUploadServiceS3 {
+object ImageUploadService {
     private const val BUCKET = "elasticbeanstalk-ap-south-1-879381256721"
     private const val REGION = "ap-south-1"
     private val s3Client = S3Client {
