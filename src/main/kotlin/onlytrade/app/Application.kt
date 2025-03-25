@@ -18,6 +18,7 @@ import io.ktor.server.response.respondText
 import io.ktor.server.thymeleaf.Thymeleaf
 import onlytrade.app.db.configureDatabases
 import onlytrade.app.login.data.LoginConst
+import onlytrade.app.login.data.user.UserRepository
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 
 
@@ -85,7 +86,9 @@ fun Application.module() {
         basic(LoginConst.BASIC_AUTH) {
             validate { credentials ->
                 // Validate credentials (username and password)
-                if (credentials.name.isNotBlank() && credentials.password.isNotBlank()) {
+                val user = UserRepository.findUserByCredential(credentials.name)
+                val userFound = user != null && user.password == credentials.password
+                if (userFound) {
                     UserIdPrincipal(credentials.name) // Return principal if valid
                 } else {
                     null // Invalid credentials

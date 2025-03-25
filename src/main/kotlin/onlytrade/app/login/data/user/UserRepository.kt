@@ -16,7 +16,8 @@ object UserRepository {
      * The user needs to be authenticated before this method can be used else it will throw an exception.
      */
     suspend fun findUserByCredential(credential: String) = suspendTransaction {
-        dao.find((table.phone eq credential) or (table.email eq credential)).single().toModel()
+        dao.find((table.phone eq credential) or (table.email eq credential)).singleOrNull()
+            ?.toModel()
     }
 
     suspend fun findUserByEmail(email: String) = suspendTransaction {
@@ -47,16 +48,18 @@ object UserRepository {
           }*/
     }
 
-    suspend fun addUserByEmail(email: String) = suspendTransaction {
+    suspend fun addUserByEmail(email: String, password: String) = suspendTransaction {
         dao.new {
             this.email = email
+            this.password = password
         }.toModel()
     }
 
 
-    suspend fun addUserByPhone(phone: String) = suspendTransaction {
+    suspend fun addUserByPhone(phone: String, password: String) = suspendTransaction {
         dao.new {
             this.phone = phone
+            this.password = password
         }.toModel()
     }
 

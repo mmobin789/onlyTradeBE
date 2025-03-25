@@ -9,6 +9,7 @@ import io.ktor.server.routing.routing
 import io.ktor.server.thymeleaf.ThymeleafContent
 import onlytrade.app.login.data.ui.LoginUi
 import onlytrade.app.login.route.login
+import onlytrade.app.product.add.route.addProduct
 
 fun Application.addRouting() {
     val baseUrl = System.getenv("BASE_URL") ?: "http://127.0.0.1:80/"
@@ -29,8 +30,7 @@ fun Application.addRouting() {
             call.respond(ThymeleafContent("login", uiData))
         }
         login()
-
-        // Static plugin. Try to access `/static/login.html`
+        addProduct()
 
     }
 }

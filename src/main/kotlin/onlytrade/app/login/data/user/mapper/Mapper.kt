@@ -6,6 +6,7 @@ import onlytrade.app.viewmodel.login.repository.data.db.User
 fun UserDAO.toModel(): User = User(
     id = id.value,
     name = usersName,
+    password = password,
     phone = phone,
     email = email,
     verified = verified,

@@ -10,6 +10,7 @@ class UserDAO(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<UserDAO>(UserTable)
 
     var usersName by UserTable.usersName
+    var password by UserTable.password
     var email by UserTable.email
     var phone by UserTable.phone
     var verified by UserTable.verified
