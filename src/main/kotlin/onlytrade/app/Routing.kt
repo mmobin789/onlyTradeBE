@@ -1,6 +1,7 @@
 package onlytrade.app
 
 import io.ktor.server.application.Application
+import io.ktor.server.application.log
 import io.ktor.server.http.content.staticResources
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondRedirect
@@ -30,7 +31,7 @@ fun Application.addRouting() {
             call.respond(ThymeleafContent("login", uiData))
         }
         login()
-        addProduct()
+        addProduct(log)
 
     }
 }

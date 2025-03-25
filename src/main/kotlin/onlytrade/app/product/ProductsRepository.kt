@@ -7,6 +7,7 @@ import onlytrade.app.utils.ImageUploadService
 import onlytrade.app.viewmodel.product.add.repository.data.db.Product
 import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
 object ProductsRepository {
@@ -50,6 +51,8 @@ object ProductsRepository {
             estPrice = addProductRequest.estPrice
         }.id.value
 
+        exposedLogger.info("Product Added :$productId")
+
         val productImages = addProductRequest.productImages!!
 
         val urlsBuilder = StringBuilder(productImages.size)
@@ -64,6 +67,8 @@ object ProductsRepository {
             ImageUploadService.uploadFile(
                 key = filepath, byteArray = bytes
             )
+
+            exposedLogger.info("Product Image Uploaded :$filepath and byte array size = ${bytes.size}")
 
             val url = ImageUploadService.buildImageUrl(
                 userId = userId,
@@ -87,7 +92,10 @@ object ProductsRepository {
     private suspend fun setProductImages(id: Int, imageUrls: String) = suspendTransaction {
         dao.findByIdAndUpdate(id) { product ->
             product.imageUrls = imageUrls
+        }?.also {
+            exposedLogger.info("Products image urls set =  ${it.imageUrls}")
         }
     }
+
 
 }

@@ -4,6 +4,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
+import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.basic
@@ -81,7 +82,7 @@ fun Application.module() {
         })
     }
     install(Resources)
-
+    val log = this.log
     install(Authentication) {
         basic(LoginConst.BASIC_AUTH) {
             validate { credentials ->
@@ -89,7 +90,9 @@ fun Application.module() {
                 val user = UserRepository.findUserByCredential(credentials.name)
                 val userFound = user != null && user.password == credentials.password
                 if (userFound) {
-                    UserIdPrincipal(credentials.name) // Return principal if valid
+                    UserIdPrincipal(credentials.name).also {
+                        log.info("UserIdPrincipal set = ${it.name}")
+                    }// Return principal if valid
                 } else {
                     null // Invalid credentials
                 }
