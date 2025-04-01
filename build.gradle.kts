@@ -50,6 +50,12 @@ ktor {
         )
     }
 }
+
+allprojects {
+    repositories {
+        maven { setUrl("https://jitpack.io") }
+    }
+}
 dependencies {
     implementation(projects.onlyTradeBusiness)
     implementation(libs.logback)
@@ -76,7 +82,8 @@ dependencies {
     implementation(libs.exposed.dao)
     implementation(libs.h2)
     implementation(libs.postgresql)
-    implementation(libs.s3) //amazon s3
+    implementation("com.github.imagekit-developer:imagekit-java:2.0.0")
+
 
 
     // implementation(libs.kotlin.css)

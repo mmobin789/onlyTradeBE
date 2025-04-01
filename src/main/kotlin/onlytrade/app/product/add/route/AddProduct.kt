@@ -37,11 +37,24 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
                 val productImages = ArrayList<ByteArray>(15)
                 val multipart = call.receiveMultipart()
                 multipart.forEachPart { part ->
-                    if (part is PartData.FileItem) part.provider().toInputStream().use {
-                        productImages.add(it.readBytes())
+                    log.info("Received part: ${part.name}, Type: ${part::class.simpleName}")
+                    if (part is PartData.FileItem && part.name?.contains("productImage") == true) {
+                        log.info("Add Product Request Image Received:${part.name}")
+                        try {
+                            part.provider()
+                                .toInputStream().use {
+                                    productImages.add(it.readBytes())
 
-                    }
-                    else if (part is PartData.FormItem && part.name == "AddProductRequest") {
+                                }
+                        } catch (e: Exception) {
+                            val error = "Failed to read product image part: ${e.message}"
+                            log.error(error)
+                            call.respond(
+                                HttpStatusCode.NotAcceptable,
+                                AddProductResponse(error)
+                            )
+                        }
+                    } else if (part is PartData.FormItem && part.name == "AddProductRequest") {
                         addProductRequest = Json.decodeFromString(part.value)
                         log.info("Add Product Request Received:${part.value}")
 
@@ -51,7 +64,7 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
 
                 addProductRequest = addProductRequest.copy(productImages = productImages)
 
-                log.info("Product Images Found:${productImages.size}")
+                log.info("Product Images Found:${productImages.size}") //todo code works fine until this line now.
 
                 val productId = ProductsRepository.addProduct(
                     userId = user.id, addProductRequest = addProductRequest

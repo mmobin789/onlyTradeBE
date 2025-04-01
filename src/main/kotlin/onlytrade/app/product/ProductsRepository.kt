@@ -64,9 +64,7 @@ object ProductsRepository {
                 productId = productId,
                 imageNo = index + 1
             )
-            ImageUploadService.uploadFile(
-                key = filepath, byteArray = bytes
-            )
+            ImageUploadService.uploadFile(name = filepath, byteArray = bytes) //todo working here.
 
             exposedLogger.info("Product Image Uploaded :$filepath and byte array size = ${bytes.size}")
 

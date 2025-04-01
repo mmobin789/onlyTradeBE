@@ -1,22 +1,19 @@
 package onlytrade.app.utils
 
-import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
-import aws.sdk.kotlin.services.s3.S3Client
-import aws.sdk.kotlin.services.s3.model.DeleteObjectRequest
-import aws.sdk.kotlin.services.s3.model.GetObjectRequest
-import aws.sdk.kotlin.services.s3.model.PutObjectRequest
-import aws.smithy.kotlin.runtime.content.ByteStream
-import aws.smithy.kotlin.runtime.content.toByteArray
+import io.imagekit.sdk.ImageKit
+import io.imagekit.sdk.config.Configuration
+import io.imagekit.sdk.models.FileCreateRequest
 
 object ImageUploadService {
-    private const val BUCKET = "elasticbeanstalk-ap-south-1-879381256721"
-    private const val REGION = "ap-south-1"
-    private val s3Client = S3Client {
-        region = REGION
-        credentialsProvider = StaticCredentialsProvider {
 
-        }
-    } // Change region accordingly
+    private val imageKit = ImageKit.getInstance().apply {
+        config = Configuration(
+            "public_JbEOxy+vPRhChIBaX7ZaqHNR68s=",
+            "private_X/R+XVvK1DCDVZM9JL7ugWPvqSI=",
+            "https://ik.imagekit.io/ywetwhs4e9/otdev/"
+        )
+    }
+
 
     fun buildImageUrl(
         userId: Int,
@@ -31,40 +28,37 @@ object ImageUploadService {
         categoryId: Int,
         productId: Int,
         imageNo: Int
-    ) = "otDevImages/$userId/$categoryId/$productId/$imageNo"
+    ) = "productImages/$userId/$categoryId/$productId/$imageNo"
 
     suspend
 
     fun uploadFile(
-        bucketName: String = BUCKET,
-        key: String,
+        name: String,
         byteArray: ByteArray
-    ) {
-        val request = PutObjectRequest {
-            bucket = bucketName
-            this.key = key
-            body = ByteStream.fromBytes(byteArray)
-            contentType = "image/jpg"
+    ): String? = FileCreateRequest(byteArray, name).run {
+        try {
+            imageKit.upload(this).url
+        } catch (e: Exception) {
+            null
         }
-        s3Client.putObject(request)
     }
 
-    suspend fun downloadFile(bucketName: String = BUCKET, key: String): ByteArray? {
-        val request = GetObjectRequest {
-            this.bucket = bucketName
-            this.key = key
-        }
-        return s3Client.getObject(request) { response ->
-            response.body?.toByteArray()
+    /*    suspend fun downloadFile(bucketName: String = BUCKET, key: String): ByteArray? {
+            val request = GetObjectRequest {
+                this.bucket = bucketName
+                this.key = key
+            }
+            return s3Client.getObject(request) { response ->
+                response.body?.toByteArray()
+            }
+
         }
 
-    }
-
-    suspend fun deleteFile(bucketName: String = BUCKET, key: String) {
-        val request = DeleteObjectRequest {
-            this.bucket = bucketName
-            this.key = key
-        }
-        s3Client.deleteObject(request)
-    }
+        suspend fun deleteFile(bucketName: String = BUCKET, key: String) {
+            val request = DeleteObjectRequest {
+                this.bucket = bucketName
+                this.key = key
+            }
+            s3Client.deleteObject(request)
+        }*/
 }
