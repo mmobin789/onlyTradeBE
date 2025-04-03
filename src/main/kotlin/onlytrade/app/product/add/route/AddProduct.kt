@@ -50,7 +50,7 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
                             log.error(error)
                             call.respond(
                                 HttpStatusCode.NotAcceptable,
-                                AddProductResponse(error)
+                                AddProductResponse(msg = error)
                             )
                         }
                     } else if (part is PartData.FormItem && part.name == "AddProductRequest") {
@@ -80,7 +80,7 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
         } ?: run {
             call.respond(
                 HttpStatusCode.Unauthorized,
-                AddProductResponse(msg = "401 due to null UserIdCredentials.")
+                AddProductResponse(msg = "Invalid UserIdCredentials.")
             )
         }
     }

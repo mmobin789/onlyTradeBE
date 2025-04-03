@@ -82,7 +82,7 @@ dependencies {
     implementation(libs.exposed.dao)
     implementation(libs.h2)
     implementation(libs.postgresql)
-    implementation("com.github.imagekit-developer:imagekit-java:2.0.0")
+    implementation(libs.imagekit.java)
 
 
 
