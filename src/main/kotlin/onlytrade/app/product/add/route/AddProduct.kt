@@ -36,6 +36,7 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
                 estPrice = -1.0
             )
             log.info("User Found:${user.id}")
+            var isError = false
             withContext(Dispatchers.IO) {
                 val productImages = ArrayList<ByteArray>(15)
                 val multipart = call.receiveMultipart()
@@ -50,12 +51,14 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
 
                                 }
                         } catch (e: Exception) {
+                            isError = true
                             val error = "Failed to read product image part: ${e.message}"
                             log.error(error)
                             call.respond(
                                 HttpStatusCode.NotAcceptable,
                                 AddProductResponse(msg = error)
                             )
+                            return@forEachPart
                         }
                     } else if (part is PartData.FormItem && part.name == "AddProductRequest") {
                         addProductRequest = Json.decodeFromString(part.value)
@@ -66,6 +69,10 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
                 }
 
                 //   addProductRequest = addProductRequest.copy(productImages = productImages)
+
+                if (isError) {
+                    return@withContext
+                }
 
                 log.info("Product Images Found:${productImages.size}")
 
