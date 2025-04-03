@@ -3,7 +3,6 @@ package onlytrade.app.product
 import onlytrade.app.db.suspendTransaction
 import onlytrade.app.product.data.dao.ProductDao
 import onlytrade.app.product.data.table.ProductTable
-import onlytrade.app.utils.ImageUploadService
 import onlytrade.app.viewmodel.product.add.repository.data.db.Product
 import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -42,61 +41,24 @@ object ProductsRepository {
     /**
      * Returns the id of product on successful insertion.
      */
-    suspend fun addProduct(userId: Int, addProductRequest: AddProductRequest) =
-        suspendTransaction {
-            val productId = dao.new {
-                this.userId = userId
-                subcategoryId = addProductRequest.subcategoryId
-                name = addProductRequest.name
-                description = addProductRequest.description
-                estPrice = addProductRequest.estPrice
-                imageUrls = "ImageURLs to be added"
-            }.id.value
+    suspend fun addProduct(userId: Int, addProductRequest: AddProductRequest) = suspendTransaction {
+        val productId = dao.new {
+            this.userId = userId
+            subcategoryId = addProductRequest.subcategoryId
+            name = addProductRequest.name
+            description = addProductRequest.description
+            estPrice = addProductRequest.estPrice
+            imageUrls = "ImageURLs to be added"
+        }.id.value
+        exposedLogger.info("Product Added :$productId")
+        productId
+    }
 
-            exposedLogger.info("Product Added :$productId")
-
-            val productImages = addProductRequest.productImages!!
-
-            val urlsBuilder = StringBuilder(productImages.size)
-
-            productImages.forEachIndexed { index, bytes ->
-                val folderPath = ImageUploadService.buildImagePath(
-                    rootFolderName = "products",
-                    userId = userId,
-                    categoryId = 786, //todo get this from CategoryRepo based on subcategory.
-                    subcategoryId = addProductRequest.subcategoryId,
-                    productId = productId,
-
-                    )
-                ImageUploadService.uploadFile(
-                    name = "productImage${index + 1}.jpg",
-                    folderPath = folderPath,
-                    byteArray = bytes
-                )?.also { url -> //todo working here.
-                    exposedLogger.info("Product Image Uploaded :$url and byte array size = ${bytes.size}")
-
-                    urlsBuilder.append(url).also {
-                        if (index < productImages.lastIndex) it.append(",")
-                    }
-                    val urls = urlsBuilder.toString()
-
-                    exposedLogger.info("Product Image Urls :$urls")
-
-                    setProductImages(
-                        id = productId, imageUrls = urls
-                    )
-                }
-            }
-
-            productId
-
-        }
-
-    private fun setProductImages(id: Int, imageUrls: String) {
+    suspend fun setProductImages(id: Int, imageUrls: String) = suspendTransaction {
         dao.findByIdAndUpdate(id) { product ->
             product.imageUrls = imageUrls
         }?.also {
-            exposedLogger.info("Products image urls set =  ${it.imageUrls}")
+            exposedLogger.info("Updated Product image urls =  ${it.imageUrls}")
         }
     }
 

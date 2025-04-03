@@ -13,11 +13,15 @@ import io.ktor.server.routing.post
 import io.ktor.util.logging.Logger
 import io.ktor.utils.io.jvm.javaio.toInputStream
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import onlytrade.app.login.data.LoginConst
 import onlytrade.app.login.data.user.UserRepository
 import onlytrade.app.product.ProductsRepository
+import onlytrade.app.product.ProductsRepository.setProductImages
+import onlytrade.app.utils.ImageUploadService
 import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
 import onlytrade.app.viewmodel.product.add.repository.data.remote.response.AddProductResponse
 
@@ -61,7 +65,7 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
                     part.dispose()
                 }
 
-                addProductRequest = addProductRequest.copy(productImages = productImages)
+                //   addProductRequest = addProductRequest.copy(productImages = productImages)
 
                 log.info("Product Images Found:${productImages.size}")
 
@@ -69,11 +73,32 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
                     userId = user.id, addProductRequest = addProductRequest
                 )
 
-                log.info("Added Product for id:$productId")
+                // ✅ Step 2: Upload images in parallel
+                val imageUrls = productImages.mapIndexed { index, bytes ->
+                    async {
+                        val folderPath = ImageUploadService.buildImagePath(
+                            rootFolderName = "products",
+                            userId = user.id,
+                            categoryId = 786, // TODO: Get from CategoryRepo based on subcategory.
+                            subcategoryId = addProductRequest.subcategoryId,
+                            productId = productId
+                        )
+                        ImageUploadService.uploadFile(
+                            name = "productImage${index + 1}.jpg",
+                            folderPath = folderPath,
+                            byteArray = bytes
+                        )
+                    }
+                }.awaitAll().filterNotNull().joinToString(",") // ✅ Collect all URLs
+
+                log.info("Product Image URLs: $imageUrls")
+
+                // ✅ Step 3: Update product with image URLs
+                setProductImages(productId, imageUrls)
 
                 call.respond(
-                    HttpStatusCode.Processing, AddProductResponse(
-                        msg = "Product against id:$productId added for review."
+                    HttpStatusCode.Created, AddProductResponse(
+                        msg = "Product successfully under review."
                     )
                 )
             }
