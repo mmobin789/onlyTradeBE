@@ -105,7 +105,7 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
 
                 call.respond(
                     HttpStatusCode.Created, AddProductResponse(
-                        msg = "Product successfully under review."
+                        msg = "Product successfully in review."
                     )
                 )
             }
