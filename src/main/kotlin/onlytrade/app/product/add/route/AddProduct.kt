@@ -32,7 +32,6 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
                 estPrice = -1.0
             )
             log.info("User Found:${user.id}")
-
             withContext(Dispatchers.IO) {
                 val productImages = ArrayList<ByteArray>(15)
                 val multipart = call.receiveMultipart()
@@ -64,7 +63,7 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
 
                 addProductRequest = addProductRequest.copy(productImages = productImages)
 
-                log.info("Product Images Found:${productImages.size}") //todo code works fine until this line now.
+                log.info("Product Images Found:${productImages.size}")
 
                 val productId = ProductsRepository.addProduct(
                     userId = user.id, addProductRequest = addProductRequest
@@ -79,8 +78,10 @@ fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
                 )
             }
         } ?: run {
-            log.error("401 due to null UserIdCredentials.")
-            call.respond(HttpStatusCode.Unauthorized)
+            call.respond(
+                HttpStatusCode.Unauthorized,
+                AddProductResponse(msg = "401 due to null UserIdCredentials.")
+            )
         }
     }
 }

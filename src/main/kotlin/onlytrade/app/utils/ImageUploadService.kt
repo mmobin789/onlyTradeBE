@@ -4,6 +4,9 @@ import io.imagekit.sdk.ImageKit
 import io.imagekit.sdk.config.Configuration
 import io.imagekit.sdk.models.FileCreateRequest
 
+/**
+ * uses imagekit.io impl.
+ */
 object ImageUploadService {
 
     private val imageKit = ImageKit.getInstance().apply {
@@ -14,51 +17,24 @@ object ImageUploadService {
         )
     }
 
-
-    fun buildImageUrl(
-        userId: Int,
-        categoryId: Int,
-        productId: Int,
-        imageNo: Int
-    ) =
-        "https://$BUCKET.s3.$REGION.amazonaws.com/otDevImages/$userId/$categoryId/products/$productId/$imageNo"
-
     fun buildImagePath(
+        rootFolderName: String,
         userId: Int,
         categoryId: Int,
-        productId: Int,
-        imageNo: Int
-    ) = "productImages/$userId/$categoryId/$productId/$imageNo"
-
-    suspend
+        subcategoryId: Int,
+        productId: Int
+    ) = "$rootFolderName/$userId/$categoryId/$subcategoryId/$productId"
 
     fun uploadFile(
         name: String,
+        folderPath: String,
         byteArray: ByteArray
     ): String? = FileCreateRequest(byteArray, name).run {
         try {
+            folder = folderPath
             imageKit.upload(this).url
         } catch (e: Exception) {
             null
         }
     }
-
-    /*    suspend fun downloadFile(bucketName: String = BUCKET, key: String): ByteArray? {
-            val request = GetObjectRequest {
-                this.bucket = bucketName
-                this.key = key
-            }
-            return s3Client.getObject(request) { response ->
-                response.body?.toByteArray()
-            }
-
-        }
-
-        suspend fun deleteFile(bucketName: String = BUCKET, key: String) {
-            val request = DeleteObjectRequest {
-                this.bucket = bucketName
-                this.key = key
-            }
-            s3Client.deleteObject(request)
-        }*/
 }
