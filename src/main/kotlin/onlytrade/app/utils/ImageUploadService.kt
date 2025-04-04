@@ -2,6 +2,7 @@ package onlytrade.app.utils
 
 import io.imagekit.sdk.ImageKit
 import io.imagekit.sdk.config.Configuration
+import io.imagekit.sdk.models.DeleteFolderRequest
 import io.imagekit.sdk.models.FileCreateRequest
 
 /**
@@ -34,7 +35,18 @@ object ImageUploadService {
             folder = folderPath
             imageKit.upload(this).url
         } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
+    }
+
+    //todo test this
+    fun deleteAllProductImages() = try {
+        imageKit.deleteFolder(DeleteFolderRequest().apply {
+            folderPath = "products"
+        }).responseMetaData.httpStatusCode
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }
