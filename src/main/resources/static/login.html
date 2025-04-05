@@ -143,24 +143,18 @@
     async function sendData(url, data) {
         try {
             // Encode username and password in Base64 for Basic Auth
-            const authHeader = 'Basic ' + btoa(data.user + ':' + data.password);
+          //  const authHeader = 'Basic ' + btoa(data.user + ':' + data.password);
 
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': authHeader, // Add Basic Auth header
+                   // 'Authorization': authHeader, // Add Basic Auth header
                 },
                 body: JSON.stringify(data),
             });
 
-            if (response.status > 310) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
             const result = await response.json();
-            console.log('Success:', result);
-            alert('Login successful!');
             alert(JSON.stringify(result));
         } catch (error) {
             console.error(error);
@@ -211,10 +205,10 @@
         const data = { password };
 
         if (email) {
-            data.user = email;
+            data.email = email;
             await sendData(emailLoginUrl, data);
         } else if (phone) {
-            data.user = phone;
+            data.phone = phone;
             await sendData(phoneLoginUrl, data);
         } else {
             alert('Please enter either an email or a phone number.');

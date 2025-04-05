@@ -43,7 +43,7 @@ object ImageUploadService {
     //todo test this
     fun deleteAllProductImages() = try {
         imageKit.deleteFolder(DeleteFolderRequest().apply {
-            folderPath = "products"
+            folderPath = "/products"
         }).responseMetaData.httpStatusCode
     } catch (e: Exception) {
         e.printStackTrace()

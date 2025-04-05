@@ -21,13 +21,13 @@ fun Route.login() {
         if (user == null) {
             val phone =
                 addUserByPhone(phone = loginRequest.phone, password = loginRequest.password).phone
-            call.respond(HttpStatusCode.Created, LoginResponse("Signup success with Phone: $phone"))
+            call.respond(HttpStatusCode.OK, LoginResponse("Signup success with Phone: $phone"))
         } else if (user.phone == loginRequest.phone && user.password == loginRequest.password) {
             call.respond(
-                HttpStatusCode.Found, LoginResponse("Login success with Phone: ${user.phone}")
+                HttpStatusCode.OK, LoginResponse("Login success with Phone: ${user.phone}")
             )
         } else {
-            call.respond(HttpStatusCode.Unauthorized)
+            call.respond(HttpStatusCode.NotFound, LoginResponse("User not found."))
         }
     }
     post("login/email") {
@@ -36,13 +36,13 @@ fun Route.login() {
         if (user == null) {
             val email =
                 addUserByEmail(email = loginRequest.email, password = loginRequest.password).email
-            call.respond(HttpStatusCode.Created, LoginResponse("Signup success with Email: $email"))
+            call.respond(HttpStatusCode.OK, LoginResponse("Signup success with Email: $email"))
         } else if (user.email == loginRequest.email && user.password == loginRequest.password) {
             call.respond(
-                HttpStatusCode.Found, LoginResponse("User already exists: ${user.email}")
+                HttpStatusCode.OK, LoginResponse("Login success with email: ${user.email}")
             )
         } else {
-            call.respond(HttpStatusCode.Unauthorized)
+            call.respond(HttpStatusCode.NotFound, LoginResponse("User not found."))
         }
 
     }
