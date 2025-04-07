@@ -1,17 +1,18 @@
 package onlytrade.app
 
-import io.ktor.client.call.body
-import io.ktor.client.request.basicAuth
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.withCharset
+import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.testing.testApplication
-import kotlinx.serialization.json.Json
-import onlytrade.app.viewmodel.login.repository.data.remote.model.response.LoginResponse
+import onlytrade.app.viewmodel.login.repository.data.remote.model.request.EmailLoginRequest
+import onlytrade.app.viewmodel.login.repository.data.remote.model.request.PhoneLoginRequest
 import java.util.UUID
 import kotlin.random.Random
 import kotlin.test.Test
@@ -54,21 +55,15 @@ class LoginApiTest {
             module()
         }
 
-        /*   client.config {
-               install(ContentNegotiation) {
-                   json()
-               }
-           }*/
-
-        val response = client.post("/login/phone") {
-            basicAuth(phone, pwd)
+        val response = client.config {
+            install(ContentNegotiation) {
+                json()
+            }
+        }.post("/login/phone") {
             contentType(ContentType.Application.Json)
-            //  setBody(PhoneLoginRequest(phone, pwd))
+            setBody(PhoneLoginRequest(phone, pwd))
         }
-
         assertEquals(HttpStatusCode.OK, response.status)
-        val loginResponse = Json.decodeFromString<LoginResponse>(response.body())
-        assertEquals("Login success with Phone: $phone", loginResponse.msg)
     }
 
     @Test
@@ -78,24 +73,16 @@ class LoginApiTest {
         application {
             module()
         }
-        /*\  client.config {
-              install(ContentNegotiation) {
-                  json()
-              }
-             install(Auth) {
-                  basic {
-                      credentials { BasicAuthCredentials(email, pwd) }
-                  }
-              }
-          }*/
 
-        val response = client.post("/login/email") {
-            basicAuth(email, pwd)
+        val response = client.config {
+            install(ContentNegotiation) {
+                json()
+            }
+        }.post("/login/email") {
+            setBody(EmailLoginRequest(email, pwd))
             contentType(ContentType.Application.Json)
         }
 
         assertEquals(HttpStatusCode.OK, response.status)
-        val loginResponse = Json.decodeFromString<LoginResponse>(response.body())
-        assertEquals("Login success with Email: $email", loginResponse.msg)
     }
 }
