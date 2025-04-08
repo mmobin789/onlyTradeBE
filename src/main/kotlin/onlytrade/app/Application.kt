@@ -1,5 +1,7 @@
 package onlytrade.app
 
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
@@ -7,7 +9,7 @@ import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
 import io.ktor.server.auth.UserIdPrincipal
-import io.ktor.server.auth.basic
+import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.calllogging.CallLogging
@@ -19,8 +21,10 @@ import io.ktor.server.response.respondText
 import io.ktor.server.thymeleaf.Thymeleaf
 import onlytrade.app.db.configureDatabases
 import onlytrade.app.login.data.LoginConst
-import onlytrade.app.login.data.user.UserRepository
-import onlytrade.app.utils.BcryptUtils
+import onlytrade.app.login.data.LoginConst.JWT_AUDIENCE
+import onlytrade.app.login.data.LoginConst.JWT_ISSUER
+import onlytrade.app.login.data.LoginConst.JWT_SECRET
+import onlytrade.app.login.data.LoginConst.JWT_USERNAME_CLAIM
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 
 
@@ -85,23 +89,18 @@ fun Application.module() {
     install(Resources)
     val log = this.log
     install(Authentication) {
-        basic(LoginConst.BASIC_AUTH) {
+        jwt(LoginConst.JWT_AUTH) {
+            realm = "OT Web"
+            verifier(
+                JWT.require(Algorithm.HMAC256(JWT_SECRET))
+                    .withAudience(JWT_AUDIENCE).withIssuer(JWT_ISSUER).build()
+            )
             validate { credentials ->
-                // Validate credentials (username and password)
-                val user = UserRepository.findUserByCredential(credentials.name)
-                val userValid = user?.run {
-                    BcryptUtils.checkPassword(
-                        password = credentials.password,
-                        hashedPassword = password
-                    )
-                } ?: false
-
-                if (userValid) {
-                    UserIdPrincipal(credentials.name).also {
+                credentials.payload.getClaim(JWT_USERNAME_CLAIM).asString()?.run {
+                    UserIdPrincipal(this).also {
                         log.info("UserIdPrincipal set = ${it.name}")
                     }// Return principal if valid
-                } else {
-                    null // Invalid credentials
+
                 }
             }
         }

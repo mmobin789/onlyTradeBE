@@ -25,7 +25,7 @@ import onlytrade.app.utils.ImageUploadService
 import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
 import onlytrade.app.viewmodel.product.add.repository.data.remote.response.AddProductResponse
 
-fun Route.addProduct(log: Logger) = authenticate(LoginConst.BASIC_AUTH) {
+fun Route.addProduct(log: Logger) = authenticate(LoginConst.JWT_AUTH) {
     post("/product/add") {
         call.principal<UserIdPrincipal>()?.run {
             val user = UserRepository.findUserByCredential(name)!!
