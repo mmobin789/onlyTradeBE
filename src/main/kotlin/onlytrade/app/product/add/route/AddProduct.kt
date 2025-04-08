@@ -3,8 +3,8 @@ package onlytrade.app.product.add.route
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
-import io.ktor.server.auth.UserIdPrincipal
 import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respond
@@ -17,7 +17,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import onlytrade.app.login.data.LoginConst
+import onlytrade.app.login.data.JwtConfig
+import onlytrade.app.login.data.JwtConfig.JWT_USERNAME_CLAIM
 import onlytrade.app.login.data.user.UserRepository
 import onlytrade.app.product.ProductsRepository
 import onlytrade.app.product.ProductsRepository.setProductImages
@@ -25,10 +26,11 @@ import onlytrade.app.utils.ImageUploadService
 import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
 import onlytrade.app.viewmodel.product.add.repository.data.remote.response.AddProductResponse
 
-fun Route.addProduct(log: Logger) = authenticate(LoginConst.JWT_AUTH) {
+fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
     post("/product/add") {
-        call.principal<UserIdPrincipal>()?.run {
-            val user = UserRepository.findUserByCredential(name)!!
+        call.principal<JWTPrincipal>()?.run {
+            val username = payload.getClaim(JWT_USERNAME_CLAIM).asString()
+            val user = UserRepository.findUserByCredential(credential = username)!!
             var addProductRequest = AddProductRequest(
                 name = "",
                 subcategoryId = -1,

@@ -1,14 +1,12 @@
 package onlytrade.app
 
-import com.auth0.jwt.JWT
-import com.auth0.jwt.algorithms.Algorithm
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.application.log
 import io.ktor.server.auth.Authentication
-import io.ktor.server.auth.UserIdPrincipal
+import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -20,11 +18,9 @@ import io.ktor.server.resources.Resources
 import io.ktor.server.response.respondText
 import io.ktor.server.thymeleaf.Thymeleaf
 import onlytrade.app.db.configureDatabases
-import onlytrade.app.login.data.LoginConst
-import onlytrade.app.login.data.LoginConst.JWT_AUDIENCE
-import onlytrade.app.login.data.LoginConst.JWT_ISSUER
-import onlytrade.app.login.data.LoginConst.JWT_SECRET
-import onlytrade.app.login.data.LoginConst.JWT_USERNAME_CLAIM
+import onlytrade.app.login.data.JwtConfig
+import onlytrade.app.login.data.JwtConfig.JWT_USERNAME_CLAIM
+import onlytrade.app.login.data.JwtConfig.jwtVerifier
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 
 
@@ -89,16 +85,14 @@ fun Application.module() {
     install(Resources)
     val log = this.log
     install(Authentication) {
-        jwt(LoginConst.JWT_AUTH) {
-            realm = "OT Web"
-            verifier(
-                JWT.require(Algorithm.HMAC256(JWT_SECRET))
-                    .withAudience(JWT_AUDIENCE).withIssuer(JWT_ISSUER).build()
-            )
+        jwt(JwtConfig.JWT_AUTH) {
+            realm = "onlyTradeBE"
+            verifier(jwtVerifier)
             validate { credentials ->
-                credentials.payload.getClaim(JWT_USERNAME_CLAIM).asString()?.run {
-                    UserIdPrincipal(this).also {
-                        log.info("UserIdPrincipal set = ${it.name}")
+                val payload = credentials.payload
+                payload.getClaim(JWT_USERNAME_CLAIM).asString()?.run {
+                    JWTPrincipal(payload).also {
+                        log.info("JWTPrincipal found = ${it.payload.getClaim(JWT_USERNAME_CLAIM).asString()}")
                     }// Return principal if valid
 
                 }
