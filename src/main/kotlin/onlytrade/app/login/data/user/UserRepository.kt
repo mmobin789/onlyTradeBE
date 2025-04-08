@@ -4,6 +4,7 @@ import onlytrade.app.db.suspendTransaction
 import onlytrade.app.login.data.user.dao.UserDAO
 import onlytrade.app.login.data.user.mapper.toModel
 import onlytrade.app.login.data.user.table.UserTable
+import onlytrade.app.utils.BcryptUtils.hashPassword
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.or
@@ -51,7 +52,7 @@ object UserRepository {
     suspend fun addUserByEmail(email: String, password: String) = suspendTransaction {
         dao.new {
             this.email = email
-            this.password = password
+            this.password = hashPassword(password)
         }.toModel()
     }
 
@@ -59,7 +60,7 @@ object UserRepository {
     suspend fun addUserByPhone(phone: String, password: String) = suspendTransaction {
         dao.new {
             this.phone = phone
-            this.password = password
+            this.password = hashPassword(password)
         }.toModel()
     }
 

@@ -9,6 +9,7 @@ import onlytrade.app.login.data.user.UserRepository.addUserByEmail
 import onlytrade.app.login.data.user.UserRepository.addUserByPhone
 import onlytrade.app.login.data.user.UserRepository.findUserByEmail
 import onlytrade.app.login.data.user.UserRepository.findUserByPhone
+import onlytrade.app.utils.BcryptUtils.checkPassword
 import onlytrade.app.viewmodel.login.repository.data.remote.model.request.EmailLoginRequest
 import onlytrade.app.viewmodel.login.repository.data.remote.model.request.PhoneLoginRequest
 import onlytrade.app.viewmodel.login.repository.data.remote.model.response.LoginResponse
@@ -18,11 +19,16 @@ fun Route.login() {
     post("login/phone") {
         val loginRequest = call.receive<PhoneLoginRequest>()
         val user = findUserByPhone(loginRequest.phone)
+        val storedHashPwd = user?.password
         if (user == null) {
             val phone =
                 addUserByPhone(phone = loginRequest.phone, password = loginRequest.password).phone
             call.respond(HttpStatusCode.OK, LoginResponse("Signup success with Phone: $phone"))
-        } else if (user.phone == loginRequest.phone && user.password == loginRequest.password) {
+        } else if (user.phone == loginRequest.phone && checkPassword(
+                password = loginRequest.password,
+                hashedPassword = storedHashPwd!!
+            )
+        ) {
             call.respond(
                 HttpStatusCode.OK, LoginResponse("Login success with Phone: ${user.phone}")
             )
@@ -33,11 +39,16 @@ fun Route.login() {
     post("login/email") {
         val loginRequest = call.receive<EmailLoginRequest>()
         val user = findUserByEmail(loginRequest.email)
+        val storedHashPwd = user?.password
         if (user == null) {
             val email =
                 addUserByEmail(email = loginRequest.email, password = loginRequest.password).email
             call.respond(HttpStatusCode.OK, LoginResponse("Signup success with Email: $email"))
-        } else if (user.email == loginRequest.email && user.password == loginRequest.password) {
+        } else if (user.email == loginRequest.email && checkPassword(
+                password = loginRequest.password,
+                hashedPassword = storedHashPwd!!
+            )
+        ) {
             call.respond(
                 HttpStatusCode.OK, LoginResponse("Login success with email: ${user.email}")
             )
