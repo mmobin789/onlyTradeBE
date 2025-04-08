@@ -20,7 +20,7 @@ import io.ktor.server.thymeleaf.Thymeleaf
 import onlytrade.app.db.configureDatabases
 import onlytrade.app.login.data.LoginConst
 import onlytrade.app.login.data.user.UserRepository
-import onlytrade.app.utils.BcryptUtils
+import onlytrade.app.utils.BcryptUtils.checkPassword
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver
 
 
@@ -90,7 +90,7 @@ fun Application.module() {
                 // Validate credentials (username and password)
                 val user = UserRepository.findUserByCredential(credentials.name)
                 val userValid = user?.run {
-                    BcryptUtils.checkPassword(
+                    checkPassword(
                         password = credentials.password,
                         hashedPassword = password
                     )
