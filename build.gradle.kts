@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.h2)
     implementation(libs.postgresql)
     implementation(libs.imagekit.java)
+    implementation(libs.jbcrypt)
 
 
 
