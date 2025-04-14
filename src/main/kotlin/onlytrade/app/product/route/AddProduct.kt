@@ -1,4 +1,4 @@
-package onlytrade.app.product.add.route
+package onlytrade.app.product.route
 
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.PartData
@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import onlytrade.app.login.data.JwtConfig
 import onlytrade.app.login.data.JwtConfig.JWT_USERNAME_CLAIM
-import onlytrade.app.login.data.user.UserRepository
+import onlytrade.app.login.data.user.UserRepository.findUserByCredential
 import onlytrade.app.product.ProductsRepository
 import onlytrade.app.product.ProductsRepository.setProductImages
 import onlytrade.app.utils.ImageUploadService
@@ -30,7 +30,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
     post("/product/add") {
         call.principal<JWTPrincipal>()?.run {
             val username = payload.getClaim(JWT_USERNAME_CLAIM).asString()
-            val user = UserRepository.findUserByCredential(credential = username)!!
+            val user = findUserByCredential(credential = username)!!
             var addProductRequest = AddProductRequest(
                 name = "",
                 subcategoryId = -1,
@@ -56,10 +56,11 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                             isError = true
                             val error = "Failed to read product image part: ${e.message}"
                             log.error(error)
+                            val statusCode = HttpStatusCode.NotAcceptable
                             call.respond(
-                                HttpStatusCode.NotAcceptable,
+                                statusCode,
                                 AddProductResponse(
-                                    status = HttpStatusCode.NotAcceptable.value,
+                                    statusCode = statusCode.value,
                                     msg = error
                                 )
                             )
@@ -107,19 +108,20 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
 
                 // ✅ Step 3: Update product with image URLs
                 setProductImages(productId, imageUrls)
-
+                val statusCode = HttpStatusCode.Created
                 call.respond(
-                    HttpStatusCode.Created, AddProductResponse(
-                        status = HttpStatusCode.Created.value,
+                    statusCode, AddProductResponse(
+                        statusCode = statusCode.value,
                         msg = "Product successfully in review."
                     )
                 )
             }
         } ?: run {
+            val statusCode = HttpStatusCode.Unauthorized
             call.respond(
-                HttpStatusCode.Unauthorized,
+                statusCode,
                 AddProductResponse(
-                    status = HttpStatusCode.Unauthorized.value,
+                    statusCode = statusCode.value,
                     msg = "Invalid UserCredentials."
                 )
             )

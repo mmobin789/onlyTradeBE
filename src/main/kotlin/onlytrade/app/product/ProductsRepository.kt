@@ -3,8 +3,8 @@ package onlytrade.app.product
 import onlytrade.app.db.suspendTransaction
 import onlytrade.app.product.data.dao.ProductDao
 import onlytrade.app.product.data.table.ProductTable
-import onlytrade.app.viewmodel.product.add.repository.data.db.Product
 import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
+import onlytrade.app.viewmodel.product.repository.data.db.Product
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
@@ -13,7 +13,7 @@ object ProductsRepository {
     private val table = ProductTable
     private val dao = ProductDao
 
-    suspend fun getProducts(pageNo: Int, pageSize: Int = 20, userId: Int? = null) =
+    suspend fun getProducts(pageNo: Int, pageSize: Int, userId: Int? = null) =
         suspendTransaction {
             val query = table.selectAll().limit(pageSize)
             if (userId != null)
@@ -31,7 +31,8 @@ object ProductsRepository {
                     userId = row[table.userId],
                     name = row[table.name],
                     description = row[table.description],
-                    estPrice = row[table.estPrice]
+                    estPrice = row[table.estPrice],
+                    imageUrls = row[table.imageUrls]
                 )
 
             }

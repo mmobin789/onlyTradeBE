@@ -8,7 +8,6 @@ import onlytrade.app.product.productRoutes
 
 fun Application.addRouting() {
     routing {
-
         loginRoutes()
         productRoutes(log)
 

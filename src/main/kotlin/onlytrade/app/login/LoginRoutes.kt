@@ -49,9 +49,10 @@ fun Route.loginRoutes() {
                 addUserByPhone(phone = loginRequest.phone, password = loginRequest.password)
             val phone = newUser.phone!!
             val token = generateJWTToken(username = phone)
+            val statusCode = HttpStatusCode.OK
             call.respond(
-                HttpStatusCode.OK,
-                LoginResponse(status = HttpStatusCode.OK.value, jwtToken = token, user = newUser)
+                statusCode,
+                LoginResponse(status = statusCode.value, jwtToken = token, user = newUser)
             )
         } else if (user.phone == loginRequest.phone && checkPassword(
                 password = loginRequest.password,
@@ -59,14 +60,16 @@ fun Route.loginRoutes() {
             )
         ) {
             val token = generateJWTToken(username = user.phone!!)
+            val statusCode = HttpStatusCode.OK
             call.respond(
-                HttpStatusCode.OK,
-                LoginResponse(status = HttpStatusCode.OK.value, jwtToken = token, user = user)
+                statusCode,
+                LoginResponse(status = statusCode.value, jwtToken = token, user = user)
             )
         } else {
+            val statusCode = HttpStatusCode.NotFound
             call.respond(
-                HttpStatusCode.NotFound,
-                LoginResponse(status = HttpStatusCode.NotFound.value, jwtToken = null, user = null)
+                statusCode,
+                LoginResponse(status = statusCode.value, jwtToken = null, user = null)
             )
         }
     }
@@ -79,9 +82,10 @@ fun Route.loginRoutes() {
                 addUserByEmail(email = loginRequest.email, password = loginRequest.password)
             val email = newUser.email!!
             val token = generateJWTToken(username = email)
+            val statusCode = HttpStatusCode.OK
             call.respond(
-                HttpStatusCode.OK,
-                LoginResponse(status = HttpStatusCode.OK.value, jwtToken = token, user = newUser)
+                statusCode,
+                LoginResponse(status = statusCode.value, jwtToken = token, user = newUser)
             )
         } else if (user.email == loginRequest.email && checkPassword(
                 password = loginRequest.password,
@@ -89,14 +93,16 @@ fun Route.loginRoutes() {
             )
         ) {
             val token = generateJWTToken(username = user.email!!)
+            val statusCode = HttpStatusCode.OK
             call.respond(
-                HttpStatusCode.OK,
-                LoginResponse(status = HttpStatusCode.OK.value, jwtToken = token, user = user)
+                statusCode,
+                LoginResponse(status = statusCode.value, jwtToken = token, user = user)
             )
         } else {
+            val statusCode = HttpStatusCode.NotFound
             call.respond(
-                HttpStatusCode.NotFound,
-                LoginResponse(status = HttpStatusCode.NotFound.value, jwtToken = null, user = null)
+                statusCode,
+                LoginResponse(status = statusCode.value, jwtToken = null, user = null)
             )
         }
 
