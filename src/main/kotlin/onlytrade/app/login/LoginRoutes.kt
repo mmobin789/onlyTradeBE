@@ -1,11 +1,16 @@
-package onlytrade.app.login.route
+package onlytrade.app.login
 
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.http.content.staticResources
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondRedirect
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import io.ktor.server.routing.post
+import io.ktor.server.thymeleaf.ThymeleafContent
 import onlytrade.app.login.data.JwtConfig.generateJWTToken
+import onlytrade.app.login.data.ui.LoginUi
 import onlytrade.app.login.data.user.UserRepository.addUserByEmail
 import onlytrade.app.login.data.user.UserRepository.addUserByPhone
 import onlytrade.app.login.data.user.UserRepository.findUserByEmail
@@ -16,7 +21,25 @@ import onlytrade.app.viewmodel.login.repository.data.remote.model.request.PhoneL
 import onlytrade.app.viewmodel.login.repository.data.remote.model.response.LoginResponse
 
 
-fun Route.login() {
+fun Route.loginRoutes() {
+
+    get("/") {
+        call.respondRedirect("/login")
+    }
+    staticResources("/", "static")
+
+
+    get("/login") {
+        val baseUrl = System.getenv("BASE_URL") ?: "http://127.0.0.1:80/"
+        val loginUi = LoginUi(
+            loginEmailUrl = "${baseUrl}login/email",
+            loginPhoneUrl = "${baseUrl}login/phone",
+        )
+
+        val uiData = mapOf("ui" to loginUi)
+        call.respond(ThymeleafContent("login", uiData))
+    }
+
     post("login/phone") {
         val loginRequest = call.receive<PhoneLoginRequest>()
         val user = findUserByPhone(loginRequest.phone)
