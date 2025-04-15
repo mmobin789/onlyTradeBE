@@ -32,7 +32,7 @@ object ProductsRepository {
                     name = row[table.name],
                     description = row[table.description],
                     estPrice = row[table.estPrice],
-                    imageUrls = row[table.imageUrls]
+                    imageUrls = row[table.imageUrls].split(",")
                 )
 
             }

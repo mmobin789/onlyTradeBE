@@ -61,7 +61,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                                 statusCode,
                                 AddProductResponse(
                                     statusCode = statusCode.value,
-                                    msg = error
+                                    error = error
                                 )
                             )
                             return@forEachPart
@@ -111,8 +111,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                 val statusCode = HttpStatusCode.Created
                 call.respond(
                     statusCode, AddProductResponse(
-                        statusCode = statusCode.value,
-                        msg = "Product successfully in review."
+                        statusCode = statusCode.value
                     )
                 )
             }
@@ -122,7 +121,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                 statusCode,
                 AddProductResponse(
                     statusCode = statusCode.value,
-                    msg = "Invalid UserCredentials."
+                    error = statusCode.description
                 )
             )
         }

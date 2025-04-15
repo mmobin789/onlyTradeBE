@@ -52,7 +52,7 @@ fun Route.loginRoutes() {
             val statusCode = HttpStatusCode.OK
             call.respond(
                 statusCode,
-                LoginResponse(status = statusCode.value, jwtToken = token, user = newUser)
+                LoginResponse(statusCode = statusCode.value, jwtToken = token, user = newUser)
             )
         } else if (user.phone == loginRequest.phone && checkPassword(
                 password = loginRequest.password,
@@ -63,13 +63,13 @@ fun Route.loginRoutes() {
             val statusCode = HttpStatusCode.OK
             call.respond(
                 statusCode,
-                LoginResponse(status = statusCode.value, jwtToken = token, user = user)
+                LoginResponse(statusCode = statusCode.value, jwtToken = token, user = user)
             )
         } else {
             val statusCode = HttpStatusCode.NotFound
             call.respond(
                 statusCode,
-                LoginResponse(status = statusCode.value, jwtToken = null, user = null)
+                LoginResponse(statusCode = statusCode.value, error = statusCode.description)
             )
         }
     }
@@ -85,7 +85,7 @@ fun Route.loginRoutes() {
             val statusCode = HttpStatusCode.OK
             call.respond(
                 statusCode,
-                LoginResponse(status = statusCode.value, jwtToken = token, user = newUser)
+                LoginResponse(statusCode = statusCode.value, jwtToken = token, user = newUser)
             )
         } else if (user.email == loginRequest.email && checkPassword(
                 password = loginRequest.password,
@@ -96,13 +96,13 @@ fun Route.loginRoutes() {
             val statusCode = HttpStatusCode.OK
             call.respond(
                 statusCode,
-                LoginResponse(status = statusCode.value, jwtToken = token, user = user)
+                LoginResponse(statusCode = statusCode.value, jwtToken = token, user = user)
             )
         } else {
             val statusCode = HttpStatusCode.NotFound
             call.respond(
                 statusCode,
-                LoginResponse(status = statusCode.value, jwtToken = null, user = null)
+                LoginResponse(statusCode = statusCode.value, error = statusCode.description)
             )
         }
 
