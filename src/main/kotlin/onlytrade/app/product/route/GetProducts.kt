@@ -11,9 +11,9 @@ import onlytrade.app.viewmodel.product.repository.data.remote.response.GetProduc
 fun Route.getProducts(logger: Logger) {
     get("/products") {
         val params = call.queryParameters
-        val pageSize = params["pageSize"]?.toIntOrNull() ?: 20
-        val pageNo = params["pageNo"]?.toIntOrNull() ?: 1
-        val userId = params["userId"]?.toIntOrNull()
+        val pageSize = params["size"]?.toIntOrNull() ?: 20
+        val pageNo = params["page"]?.toIntOrNull() ?: 1
+        val userId = params["uid"]?.toIntOrNull()
 
         logger.info("GetProductService: pageSize=$pageSize, pageNo=$pageNo, userId=$userId")
 
