@@ -22,7 +22,15 @@ fun Route.getProducts(logger: Logger) {
             pageSize = pageSize,
             userId = userId
         )
-        val statusCode = HttpStatusCode.OK
-        call.respond(statusCode, GetProductsResponse(statusCode.value, products))
+        if (products.isNotEmpty()) {
+            val statusCode = HttpStatusCode.OK
+            call.respond(statusCode, GetProductsResponse(statusCode.value, products))
+        } else {
+            val statusCode = HttpStatusCode.NotFound
+            call.respond(
+                statusCode,
+                GetProductsResponse(statusCode.value, error = "No products found.")
+            )
+        }
     }
 }
