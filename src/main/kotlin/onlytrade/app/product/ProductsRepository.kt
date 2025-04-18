@@ -13,7 +13,7 @@ object ProductsRepository {
     private val table = ProductTable
     private val dao = ProductDao
 
-    suspend fun getProducts(pageNo: Int, pageSize: Int, userId: Int? = null) =
+    suspend fun getProducts(pageNo: Int, pageSize: Int, userId: Long? = null) =
         suspendTransaction {
             val query = table.selectAll().limit(pageSize)
             if (userId != null)
@@ -26,7 +26,7 @@ object ProductsRepository {
 
             query.map { row ->
                 Product(
-                    id = row[table.id].value,
+                    id = row[table.id].value.toLong(),
                     subcategoryId = row[table.subcategoryId],
                     userId = row[table.userId],
                     name = row[table.name],
@@ -42,21 +42,22 @@ object ProductsRepository {
     /**
      * Returns the id of product on successful insertion.
      */
-    suspend fun addProduct(userId: Int, addProductRequest: AddProductRequest) = suspendTransaction {
-        val productId = dao.new {
-            this.userId = userId
-            subcategoryId = addProductRequest.subcategoryId
-            name = addProductRequest.name
-            description = addProductRequest.description
-            estPrice = addProductRequest.estPrice
-            imageUrls = "ImageURLs to be added"
-        }.id.value
-        exposedLogger.info("Product Added :$productId")
-        productId
-    }
+    suspend fun addProduct(userId: Long, addProductRequest: AddProductRequest) =
+        suspendTransaction {
+            dao.new {
+                this.userId = userId
+                subcategoryId = addProductRequest.subcategoryId
+                name = addProductRequest.name
+                description = addProductRequest.description
+                estPrice = addProductRequest.estPrice
+                imageUrls = "ImageURLs to be added"
+            }.id.value.toLong().also {
+                exposedLogger.info("Product Added :$it")
+            }
+        }
 
-    suspend fun setProductImages(id: Int, imageUrls: String) = suspendTransaction {
-        dao.findByIdAndUpdate(id) { product ->
+    suspend fun setProductImages(id: Long, imageUrls: String) = suspendTransaction {
+        dao.findByIdAndUpdate(id.toInt()) { product ->
             product.imageUrls = imageUrls
         }?.also {
             exposedLogger.info("Updated Product image urls =  ${it.imageUrls}")
