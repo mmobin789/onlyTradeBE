@@ -13,7 +13,7 @@ fun Route.getProducts(logger: Logger) {
         val params = call.queryParameters
         val pageSize = params["size"]?.toIntOrNull() ?: 20
         val pageNo = params["page"]?.toIntOrNull() ?: 1
-        val userId = params["uid"]?.toIntOrNull()
+        val userId = params["uid"]?.toLongOrNull()
 
         logger.info("GetProductService: pageSize=$pageSize, pageNo=$pageNo, userId=$userId")
 
