@@ -98,29 +98,8 @@ fun Application.module() {
                 }
             }
         }
-        /*   session<UserSession>("auth-session") {
-               validate { session ->
-                   if (session.name.startsWith("jet")) {
-                       session
-                   } else {
-                       null
-                   }
-               }
-               challenge {
-                   call.respondRedirect("/login") // user will need to login again at this point.
-               }
-           }*/
-
-        //jwt {
-        // Configure jwt authentication
-        //  }
     }
     configureDatabases()
 
     addRouting()
 }
-
-/*
-suspend inline fun ApplicationCall.respondCss(builder: CssBuilder.() -> Unit) {
-    this.respondText(CssBuilder().apply(builder).toString(), ContentType.Text.CSS)
-}*/

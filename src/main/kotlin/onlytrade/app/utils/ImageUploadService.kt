@@ -20,10 +20,10 @@ object ImageUploadService {
 
     fun buildImagePath(
         rootFolderName: String,
-        userId: Int,
-        categoryId: Int,
-        subcategoryId: Int,
-        productId: Int
+        userId: Long,
+        categoryId: Long,
+        subcategoryId: Long,
+        productId: Long
     ) = "$rootFolderName/$userId/$categoryId/$subcategoryId/$productId"
 
     fun uploadFile(
