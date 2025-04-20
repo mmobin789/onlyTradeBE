@@ -33,6 +33,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
             val user = findUserByCredential(credential = username)!!
             var addProductRequest = AddProductRequest(
                 name = "",
+                categoryId = -1,
                 subcategoryId = -1,
                 description = "",
                 estPrice = -1.0

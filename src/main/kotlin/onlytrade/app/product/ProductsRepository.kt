@@ -27,6 +27,7 @@ object ProductsRepository {
             query.map { row ->
                 Product(
                     id = row[table.id].value.toLong(),
+                    categoryId = row[table.categoryId],
                     subcategoryId = row[table.subcategoryId],
                     userId = row[table.userId],
                     name = row[table.name],
@@ -46,6 +47,7 @@ object ProductsRepository {
         suspendTransaction {
             dao.new {
                 this.userId = userId
+                categoryId = addProductRequest.categoryId
                 subcategoryId = addProductRequest.subcategoryId
                 name = addProductRequest.name
                 description = addProductRequest.description
