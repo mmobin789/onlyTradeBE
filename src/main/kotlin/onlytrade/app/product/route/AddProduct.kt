@@ -23,8 +23,8 @@ import onlytrade.app.login.data.user.UserRepository.findUserByCredential
 import onlytrade.app.product.ProductsRepository
 import onlytrade.app.product.ProductsRepository.setProductImages
 import onlytrade.app.utils.ImageUploadService
-import onlytrade.app.viewmodel.product.add.repository.data.remote.request.AddProductRequest
-import onlytrade.app.viewmodel.product.add.repository.data.remote.response.AddProductResponse
+import onlytrade.app.viewmodel.product.repository.data.remote.request.AddProductRequest
+import onlytrade.app.viewmodel.product.repository.data.remote.response.AddProductResponse
 
 fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
     post("/product/add") {
