@@ -36,51 +36,61 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
             var isError = false
             withContext(Dispatchers.IO) {
                 val productImages = ArrayList<ByteArray>(15)
-                val multipart = call.receiveMultipart()
-                multipart.forEachPart { part ->
-                    log.info("Received part: ${part.name}, Type: ${part::class.simpleName}")
-                    if (part is PartData.FileItem && part.name?.contains("productImage") == true) {
-                        log.info("Add Product Request Image Received:${part.name}")
-                        try {
-                            part.provider()
-                                .toInputStream().use {
-                                    productImages.add(it.readBytes())
+                try {
+                    val multipart = call.receiveMultipart()
+                    multipart.forEachPart { part ->
+                        log.info("Received part: ${part.name}, Type: ${part::class.simpleName}")
+                        if (part is PartData.FileItem && part.name?.contains("productImage") == true) {
+                            log.info("Add Product Request Image Received:${part.name}")
+                            try {
+                                part.provider()
+                                    .toInputStream().use {
+                                        productImages.add(it.readBytes())
 
-                                }
-                        } catch (e: Exception) {
-                            isError = true
-                            val error = "Failed to read product image part: ${e.message}"
-                            log.error(error)
-                            val statusCode = HttpStatusCode.NotAcceptable
-                            call.respond(
-                                statusCode,
-                                AddProductResponse(
-                                    statusCode = statusCode.value,
-                                    error = error
+                                    }
+                            } catch (e: Exception) {
+                                isError = true
+                                val error = "Failed to read product image part: ${e.message}"
+                                log.error(error)
+                                val statusCode = HttpStatusCode.NotAcceptable
+                                call.respond(
+                                    statusCode,
+                                    AddProductResponse(
+                                        statusCode = statusCode.value,
+                                        error = error
+                                    )
                                 )
-                            )
-                            return@forEachPart
-                        }
-                    } else if (part is PartData.FormItem && part.name == "AddProductRequest") {
-                        addProductRequest = try {
-                            Json.decodeFromString<AddProductRequest>(part.value).also {
-                                log.info("Add Product Request Received:${part.value}")
+                                return@forEachPart
                             }
-                        } catch (e: Exception) {
-                            isError = true
-                            val error = "Failed to read AddProductRequest part: ${e.message}"
-                            log.error(error)
-                            val statusCode = HttpStatusCode.NotAcceptable
-                            call.respond(
-                                statusCode,
-                                AddProductResponse(statusCode = statusCode.value, error = error)
-                            )
-                            return@forEachPart
+                        } else if (part is PartData.FormItem && part.name == "AddProductRequest") {
+                            addProductRequest = try {
+                                Json.decodeFromString<AddProductRequest>(part.value).also {
+                                    log.info("Add Product Request Received:${part.value}")
+                                }
+                            } catch (e: Exception) {
+                                isError = true
+                                val error = "Failed to read AddProductRequest part: ${e.message}"
+                                log.error(error)
+                                val statusCode = HttpStatusCode.NotAcceptable
+                                call.respond(
+                                    statusCode,
+                                    AddProductResponse(statusCode = statusCode.value, error = error)
+                                )
+                                return@forEachPart
+                            }
+
+
                         }
-
-
+                        part.dispose()
                     }
-                    part.dispose()
+                } catch (e: Exception) {
+                    isError = true
+                    val statusCode = HttpStatusCode.BadRequest
+                    log.error(e.message)
+                    call.respond(
+                        statusCode,
+                        AddProductResponse(statusCode = statusCode.value, error = e.message)
+                    )
                 }
 
                 if (isError) {
@@ -90,7 +100,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                 log.info("Product Images Found:${productImages.size}")
 
                 val productId = ProductsRepository.addProduct(
-                    userId = user.id, addProductRequest = addProductRequest!!
+                    userId = user.id, product = addProductRequest?.product!!
                 )
 
                 // ✅ Step 2: Upload images in parallel

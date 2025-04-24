@@ -4,7 +4,6 @@ import onlytrade.app.db.suspendTransaction
 import onlytrade.app.product.data.dao.ProductDao
 import onlytrade.app.product.data.table.ProductTable
 import onlytrade.app.viewmodel.product.repository.data.db.Product
-import onlytrade.app.viewmodel.product.repository.data.remote.request.AddProductRequest
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
@@ -43,9 +42,8 @@ object ProductsRepository {
     /**
      * Returns the id of product on successful insertion.
      */
-    suspend fun addProduct(userId: Long, addProductRequest: AddProductRequest) =
+    suspend fun addProduct(userId: Long, product: Product) =
         suspendTransaction {
-            val product = addProductRequest.product
             dao.new {
                 this.userId = userId
                 categoryId = product.categoryId

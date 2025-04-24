@@ -41,68 +41,84 @@ fun Route.loginRoutes() {
     }
 
     post("login/phone") {
-        val loginRequest = call.receive<PhoneLoginRequest>()
-        val user = findUserByPhone(loginRequest.phone)
-        val storedHashPwd = user?.password
-        if (user == null) {
-            val newUser =
-                addUserByPhone(phone = loginRequest.phone, password = loginRequest.password)
-            val phone = newUser.phone!!
-            val token = generateJWTToken(username = phone)
-            val statusCode = HttpStatusCode.OK
+        try {
+            val loginRequest = call.receive<PhoneLoginRequest>()
+            val user = findUserByPhone(loginRequest.phone)
+            val storedHashPwd = user?.password
+            if (user == null) {
+                val newUser =
+                    addUserByPhone(phone = loginRequest.phone, password = loginRequest.password)
+                val phone = newUser.phone!!
+                val token = generateJWTToken(username = phone)
+                val statusCode = HttpStatusCode.OK
+                call.respond(
+                    statusCode,
+                    LoginResponse(statusCode = statusCode.value, jwtToken = token, user = newUser)
+                )
+            } else if (user.phone == loginRequest.phone && checkPassword(
+                    password = loginRequest.password,
+                    hashedPassword = storedHashPwd!!
+                )
+            ) {
+                val token = generateJWTToken(username = user.phone!!)
+                val statusCode = HttpStatusCode.OK
+                call.respond(
+                    statusCode,
+                    LoginResponse(statusCode = statusCode.value, jwtToken = token, user = user)
+                )
+            } else {
+                val statusCode = HttpStatusCode.NotFound
+                call.respond(
+                    statusCode,
+                    LoginResponse(statusCode = statusCode.value, error = statusCode.description)
+                )
+            }
+        } catch (e: Exception) {
+            val statusCode = HttpStatusCode.BadRequest
             call.respond(
                 statusCode,
-                LoginResponse(statusCode = statusCode.value, jwtToken = token, user = newUser)
-            )
-        } else if (user.phone == loginRequest.phone && checkPassword(
-                password = loginRequest.password,
-                hashedPassword = storedHashPwd!!
-            )
-        ) {
-            val token = generateJWTToken(username = user.phone!!)
-            val statusCode = HttpStatusCode.OK
-            call.respond(
-                statusCode,
-                LoginResponse(statusCode = statusCode.value, jwtToken = token, user = user)
-            )
-        } else {
-            val statusCode = HttpStatusCode.NotFound
-            call.respond(
-                statusCode,
-                LoginResponse(statusCode = statusCode.value, error = statusCode.description)
+                LoginResponse(statusCode = statusCode.value, error = e.message)
             )
         }
     }
     post("login/email") {
-        val loginRequest = call.receive<EmailLoginRequest>()
-        val user = findUserByEmail(loginRequest.email)
-        val storedHashPwd = user?.password
-        if (user == null) {
-            val newUser =
-                addUserByEmail(email = loginRequest.email, password = loginRequest.password)
-            val email = newUser.email!!
-            val token = generateJWTToken(username = email)
-            val statusCode = HttpStatusCode.OK
+        try {
+            val loginRequest = call.receive<EmailLoginRequest>()
+            val user = findUserByEmail(loginRequest.email)
+            val storedHashPwd = user?.password
+            if (user == null) {
+                val newUser =
+                    addUserByEmail(email = loginRequest.email, password = loginRequest.password)
+                val email = newUser.email!!
+                val token = generateJWTToken(username = email)
+                val statusCode = HttpStatusCode.OK
+                call.respond(
+                    statusCode,
+                    LoginResponse(statusCode = statusCode.value, jwtToken = token, user = newUser)
+                )
+            } else if (user.email == loginRequest.email && checkPassword(
+                    password = loginRequest.password,
+                    hashedPassword = storedHashPwd!!
+                )
+            ) {
+                val token = generateJWTToken(username = user.email!!)
+                val statusCode = HttpStatusCode.OK
+                call.respond(
+                    statusCode,
+                    LoginResponse(statusCode = statusCode.value, jwtToken = token, user = user)
+                )
+            } else {
+                val statusCode = HttpStatusCode.NotFound
+                call.respond(
+                    statusCode,
+                    LoginResponse(statusCode = statusCode.value, error = statusCode.description)
+                )
+            }
+        } catch (e: Exception) {
+            val statusCode = HttpStatusCode.BadRequest
             call.respond(
                 statusCode,
-                LoginResponse(statusCode = statusCode.value, jwtToken = token, user = newUser)
-            )
-        } else if (user.email == loginRequest.email && checkPassword(
-                password = loginRequest.password,
-                hashedPassword = storedHashPwd!!
-            )
-        ) {
-            val token = generateJWTToken(username = user.email!!)
-            val statusCode = HttpStatusCode.OK
-            call.respond(
-                statusCode,
-                LoginResponse(statusCode = statusCode.value, jwtToken = token, user = user)
-            )
-        } else {
-            val statusCode = HttpStatusCode.NotFound
-            call.respond(
-                statusCode,
-                LoginResponse(statusCode = statusCode.value, error = statusCode.description)
+                LoginResponse(statusCode = statusCode.value, error = e.message)
             )
         }
 
