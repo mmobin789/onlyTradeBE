@@ -31,14 +31,8 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
         call.principal<JWTPrincipal>()?.run {
             val username = payload.getClaim(JWT_USERNAME_CLAIM).asString()
             val user = findUserByCredential(credential = username)!!
-            var addProductRequest = AddProductRequest(
-                name = "",
-                categoryId = -1,
-                subcategoryId = -1,
-                description = "",
-                estPrice = -1.0
-            )
             log.info("User Found:${user.id}")
+            var addProductRequest: AddProductRequest? = null
             var isError = false
             withContext(Dispatchers.IO) {
                 val productImages = ArrayList<ByteArray>(15)
@@ -68,14 +62,26 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                             return@forEachPart
                         }
                     } else if (part is PartData.FormItem && part.name == "AddProductRequest") {
-                        addProductRequest = Json.decodeFromString(part.value)
-                        log.info("Add Product Request Received:${part.value}")
+                        addProductRequest = try {
+                            Json.decodeFromString<AddProductRequest>(part.value).also {
+                                log.info("Add Product Request Received:${part.value}")
+                            }
+                        } catch (e: Exception) {
+                            isError = true
+                            val error = "Failed to read AddProductRequest part: ${e.message}"
+                            log.error(error)
+                            val statusCode = HttpStatusCode.NotAcceptable
+                            call.respond(
+                                statusCode,
+                                AddProductResponse(statusCode = statusCode.value, error = error)
+                            )
+                            return@forEachPart
+                        }
+
 
                     }
                     part.dispose()
                 }
-
-                //   addProductRequest = addProductRequest.copy(productImages = productImages)
 
                 if (isError) {
                     return@withContext
@@ -84,7 +90,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                 log.info("Product Images Found:${productImages.size}")
 
                 val productId = ProductsRepository.addProduct(
-                    userId = user.id, addProductRequest = addProductRequest
+                    userId = user.id, addProductRequest = addProductRequest!!
                 )
 
                 // ✅ Step 2: Upload images in parallel
@@ -94,7 +100,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                             rootFolderName = "products",
                             userId = user.id,
                             categoryId = 786, // TODO: Get from CategoryRepo based on subcategory.
-                            subcategoryId = addProductRequest.subcategoryId,
+                            subcategoryId = addProductRequest!!.product.subcategoryId,
                             productId = productId
                         )
                         ImageUploadService.uploadFile(

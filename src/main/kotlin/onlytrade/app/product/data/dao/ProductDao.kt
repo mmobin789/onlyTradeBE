@@ -1,12 +1,12 @@
 package onlytrade.app.product.data.dao
 
 import onlytrade.app.product.data.table.ProductTable
-import org.jetbrains.exposed.dao.IntEntity
-import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.LongEntity
+import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
-class ProductDao(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<ProductDao>(ProductTable)
+class ProductDao(id: EntityID<Long>) : LongEntity(id) {
+    companion object : LongEntityClass<ProductDao>(ProductTable)
 
     var userId by ProductTable.userId
     var categoryId by ProductTable.categoryId

@@ -1,9 +1,9 @@
 package onlytrade.app.product.data.table
 
-import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 
-object ProductTable : IntIdTable(name = "product") {
+object ProductTable : LongIdTable(name = "product") {
     val userId = long("userId")
     val categoryId = long("categoryId")
     val subcategoryId = long("subcategoryId")

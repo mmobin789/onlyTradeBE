@@ -26,7 +26,7 @@ object ProductsRepository {
 
             query.map { row ->
                 Product(
-                    id = row[table.id].value.toLong(),
+                    id = row[table.id].value,
                     categoryId = row[table.categoryId],
                     subcategoryId = row[table.subcategoryId],
                     userId = row[table.userId],
@@ -45,21 +45,22 @@ object ProductsRepository {
      */
     suspend fun addProduct(userId: Long, addProductRequest: AddProductRequest) =
         suspendTransaction {
+            val product = addProductRequest.product
             dao.new {
                 this.userId = userId
-                categoryId = addProductRequest.categoryId
-                subcategoryId = addProductRequest.subcategoryId
-                name = addProductRequest.name
-                description = addProductRequest.description
-                estPrice = addProductRequest.estPrice
+                categoryId = product.categoryId
+                subcategoryId = product.subcategoryId
+                name = product.name
+                description = product.description
+                estPrice = product.estPrice
                 imageUrls = "ImageURLs to be added"
-            }.id.value.toLong().also {
+            }.id.value.also {
                 exposedLogger.info("Product Added :$it")
             }
         }
 
     suspend fun setProductImages(id: Long, imageUrls: String) = suspendTransaction {
-        dao.findByIdAndUpdate(id.toInt()) { product ->
+        dao.findByIdAndUpdate(id) { product ->
             product.imageUrls = imageUrls
         }?.also {
             exposedLogger.info("Updated Product image urls =  ${it.imageUrls}")
