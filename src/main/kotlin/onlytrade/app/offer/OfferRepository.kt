@@ -12,17 +12,16 @@ object OfferRepository {
     val table = OfferTable
     val dao = OfferDao
 
-    suspend fun newOffer(userId: Long, productId: Long, price: Double) = suspendTransaction {
+    suspend fun addOffer(offer: Offer) = suspendTransaction {
         dao.new {
-            this.userId = userId
-            this.productId = productId
-            this.price = price
+            this.userId = offer.userId
+            this.productId = offer.productId
+            this.price = offer.price
         }.id.value.also {
-            exposedLogger.info("Offer Created :$it")
+            exposedLogger.info("Offer Added :$it")
         }
     }
 
-    //todo working here.
     suspend fun getOffers(userId: Long, pageNo: Int, pageSize: Int) =
         suspendTransaction {
             val query = table.selectAll().limit(pageSize).where(table.userId eq userId)
@@ -43,4 +42,15 @@ object OfferRepository {
             }
 
         }
+
+
+    suspend fun approveOffer(id: Long, approved: Boolean) = suspendTransaction {
+        dao.findByIdAndUpdate(id) { offer ->
+            offer.approved = approved
+        }?.also {
+            exposedLogger.info("offer approved by seller =  ${it.approved}")
+            it.approved
+        } ?: false
+    }
+
 }
