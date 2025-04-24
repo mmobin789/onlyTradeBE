@@ -1,0 +1,46 @@
+package onlytrade.app.offer
+
+import onlytrade.app.db.suspendTransaction
+import onlytrade.app.offer.data.dao.OfferDao
+import onlytrade.app.offer.data.table.OfferTable
+import onlytrade.app.viewmodel.offer.repository.data.db.Offer
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.exposedLogger
+import org.jetbrains.exposed.sql.selectAll
+
+object OfferRepository {
+    val table = OfferTable
+    val dao = OfferDao
+
+    suspend fun newOffer(userId: Long, productId: Long, price: Double) = suspendTransaction {
+        dao.new {
+            this.userId = userId
+            this.productId = productId
+            this.price = price
+        }.id.value.also {
+            exposedLogger.info("Offer Created :$it")
+        }
+    }
+
+    //todo working here.
+    suspend fun getOffers(userId: Long, pageNo: Int, pageSize: Int) =
+        suspendTransaction {
+            val query = table.selectAll().limit(pageSize).where(table.userId eq userId)
+            if (pageNo > 1) {    // 2..20..3..40..4..60
+                val offset = ((pageSize * pageNo) - pageSize).toLong()
+                query.offset(offset)
+            }
+
+            query.map { row ->
+                Offer(
+                    id = row[table.id].value,
+                    userId = row[table.userId],
+                    productId = row[table.productId],
+                    price = row[table.price],
+                    approved = row[table.approved]
+                )
+
+            }
+
+        }
+}
