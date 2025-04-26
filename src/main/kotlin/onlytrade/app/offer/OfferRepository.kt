@@ -1,5 +1,7 @@
 package onlytrade.app.offer
 
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import onlytrade.app.db.suspendTransaction
 import onlytrade.app.offer.data.dao.OfferDao
 import onlytrade.app.offer.data.table.OfferTable
@@ -15,7 +17,7 @@ object OfferRepository {
     suspend fun addOffer(offer: Offer) = suspendTransaction {
         dao.new {
             this.userId = offer.userId
-            this.productId = offer.productId
+            this.productIds = Json.encodeToString(offer.productIds)
             this.price = offer.price
         }.id.value.also {
             exposedLogger.info("Offer Added :$it")
@@ -34,8 +36,8 @@ object OfferRepository {
                 Offer(
                     id = row[table.id].value,
                     userId = row[table.userId],
-                    productId = row[table.productId],
-                    price = row[table.price],
+                    productIds = Json.decodeFromString(row[table.productIds]),
+                    price = row[table.extraPrice],
                     approved = row[table.approved]
                 )
 
