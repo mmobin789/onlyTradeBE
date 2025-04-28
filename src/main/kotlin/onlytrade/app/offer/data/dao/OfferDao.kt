@@ -10,7 +10,8 @@ class OfferDao(id: EntityID<Long>) : LongEntity(id) {
 
     var offerMakerId by OfferTable.offerMakerId
     var offerReceiverId by OfferTable.offerReceiverId
-    var productIds by OfferTable.productIds
-    var price by OfferTable.extraPrice
+    var offeredProductIds by OfferTable.offeredProductIds
+    var offerReceiverProductId by OfferTable.offerReceiverProductId
+    var extraPrice by OfferTable.extraPrice
     var approved by OfferTable.approved
 }

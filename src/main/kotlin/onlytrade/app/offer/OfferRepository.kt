@@ -18,8 +18,9 @@ object OfferRepository {
         dao.new {
             this.offerMakerId = offer.offerMakerId
             this.offerReceiverId = offer.offerReceiverId
-            this.productIds = Json.encodeToString(offer.productIds)
-            this.price = offer.price
+            this.offerReceiverProductId = offer.offerReceiverProductId
+            this.offeredProductIds = Json.encodeToString(offer.offeredProductIds)
+            this.extraPrice = offer.extraPrice
         }.id.value.also {
             exposedLogger.info("Offer Added :$it")
         }
@@ -38,8 +39,9 @@ object OfferRepository {
                     id = row[table.id].value,
                     offerMakerId = row[table.offerMakerId],
                     offerReceiverId = row[table.offerReceiverId],
-                    productIds = Json.decodeFromString(row[table.productIds]),
-                    price = row[table.extraPrice],
+                    offerReceiverProductId = row[table.offerReceiverProductId],
+                    offeredProductIds = Json.decodeFromString(row[table.offeredProductIds]),
+                    extraPrice = row[table.extraPrice],
                     approved = row[table.approved]
                 )
 
@@ -60,8 +62,9 @@ object OfferRepository {
                     id = row[table.id].value,
                     offerMakerId = row[table.offerMakerId],
                     offerReceiverId = row[table.offerReceiverId],
-                    productIds = Json.decodeFromString(row[table.productIds]),
-                    price = row[table.extraPrice],
+                    offerReceiverProductId = row[table.offerReceiverProductId],
+                    offeredProductIds = Json.decodeFromString(row[table.offeredProductIds]),
+                    extraPrice = row[table.extraPrice],
                     approved = row[table.approved]
                 )
 
