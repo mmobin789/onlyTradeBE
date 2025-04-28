@@ -8,7 +8,8 @@ import org.jetbrains.exposed.dao.id.EntityID
 class OfferDao(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<OfferDao>(OfferTable)
 
-    var userId by OfferTable.userId
+    var offerMakerId by OfferTable.offerMakerId
+    var offerReceiverId by OfferTable.offerReceiverId
     var productIds by OfferTable.productIds
     var price by OfferTable.extraPrice
     var approved by OfferTable.approved

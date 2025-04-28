@@ -13,8 +13,8 @@ import onlytrade.app.login.data.JwtConfig.JWT_AUTH
 import onlytrade.app.login.data.JwtConfig.JWT_USERNAME_CLAIM
 import onlytrade.app.login.data.user.UserRepository.findUserByCredential
 import onlytrade.app.offer.OfferRepository
-import onlytrade.app.viewmodel.offer.repository.data.remote.request.AddOfferRequest
-import onlytrade.app.viewmodel.offer.repository.data.remote.response.AddOfferResponse
+import onlytrade.app.viewmodel.product.offer.repository.data.remote.request.AddOfferRequest
+import onlytrade.app.viewmodel.product.offer.repository.data.remote.response.AddOfferResponse
 
 fun Route.addOffer(log: Logger) = authenticate(JWT_AUTH) {
     post("/offer/add") {
