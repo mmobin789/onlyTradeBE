@@ -14,14 +14,14 @@ object ProductsRepository {
 
     suspend fun getProducts(pageNo: Int, pageSize: Int, userId: Long? = null) =
         suspendTransaction {
-            val query = table.selectAll().limit(pageSize)
+            var query = table.selectAll()
             if (userId != null)
-                query.where(table.userId eq userId)
+                query = query.where(table.userId eq userId)
 
-            if (pageNo > 1) {    // 2..20..3..40..4..60
+            query = if (pageNo > 1) {    // 2..20..3..40..4..60
                 val offset = ((pageSize * pageNo) - pageSize).toLong()
-                query.offset(offset)
-            }
+                query.offset(offset).limit(pageSize)
+            } else query.limit(pageSize)
 
             query.map { row ->
                 Product(

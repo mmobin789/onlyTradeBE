@@ -28,11 +28,11 @@ object OfferRepository {
 
     suspend fun getOffersMade(userId: Long, pageNo: Int, pageSize: Int) =
         suspendTransaction {
-            val query = table.selectAll().limit(pageSize).where(table.offerMakerId eq userId)
-            if (pageNo > 1) {    // 2..20..3..40..4..60
+            var query = table.selectAll().where(table.offerMakerId eq userId)
+            query = if (pageNo > 1) {    // 2..20..3..40..4..60
                 val offset = ((pageSize * pageNo) - pageSize).toLong()
-                query.offset(offset)
-            }
+                query.offset(offset).limit(pageSize)
+            } else query.limit(pageSize)
 
             query.map { row ->
                 Offer(
@@ -51,11 +51,11 @@ object OfferRepository {
 
     suspend fun getOffersReceived(userId: Long, pageNo: Int, pageSize: Int) =
         suspendTransaction {
-            val query = table.selectAll().limit(pageSize).where(table.offerReceiverId eq userId)
-            if (pageNo > 1) {    // 2..20..3..40..4..60
+            var query = table.selectAll().where(table.offerReceiverId eq userId)
+            query = if (pageNo > 1) {    // 2..20..3..40..4..60
                 val offset = ((pageSize * pageNo) - pageSize).toLong()
-                query.offset(offset)
-            }
+                query.offset(offset).limit(pageSize)
+            } else query.limit(pageSize)
 
             query.map { row ->
                 Offer(
