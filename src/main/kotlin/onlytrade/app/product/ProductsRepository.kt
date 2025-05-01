@@ -1,6 +1,7 @@
 package onlytrade.app.product
 
 import onlytrade.app.db.suspendTransaction
+import onlytrade.app.offer.OfferRepository
 import onlytrade.app.product.data.dao.ProductDao
 import onlytrade.app.product.data.table.ProductTable
 import onlytrade.app.viewmodel.product.repository.data.db.Product
@@ -9,6 +10,7 @@ import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
 object ProductsRepository {
+    private val offerRepository = OfferRepository
     private val table = ProductTable
     private val dao = ProductDao
 
@@ -32,9 +34,10 @@ object ProductsRepository {
                     name = row[table.name],
                     description = row[table.description],
                     estPrice = row[table.estPrice],
-                    imageUrls = row[table.imageUrls].split(",")
+                    imageUrls = row[table.imageUrls].split(","),
+                    offers = offerRepository.getOffersByProductId(row[table.id].value)
+                        .ifEmpty { null }
                 )
-
             }
 
         }

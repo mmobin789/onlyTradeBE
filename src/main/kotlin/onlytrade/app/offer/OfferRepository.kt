@@ -11,8 +11,8 @@ import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
 object OfferRepository {
-    val table = OfferTable
-    val dao = OfferDao
+    private val table = OfferTable
+    private val dao = OfferDao
 
     suspend fun addOffer(offer: Offer) = suspendTransaction {
         dao.new {
@@ -21,10 +21,15 @@ object OfferRepository {
             this.offerReceiverProductId = offer.offerReceiverProductId
             this.offeredProductIds = Json.encodeToString(offer.offeredProductIds)
             this.extraPrice = offer.extraPrice
-        }.id.value.also {
-            exposedLogger.info("Offer Added :$it")
+        }.let {
+            exposedLogger.info("Offer Added :${it.id.value}")
+            toModel(it)
         }
     }
+
+    fun getOffersByProductId(productId: Long) =
+        dao.find { table.offerReceiverProductId eq productId }.map(::toModel)
+
 
     suspend fun getOffersMade(userId: Long, pageNo: Int, pageSize: Int) =
         suspendTransaction {
@@ -42,7 +47,8 @@ object OfferRepository {
                     offerReceiverProductId = row[table.offerReceiverProductId],
                     offeredProductIds = Json.decodeFromString(row[table.offeredProductIds]),
                     extraPrice = row[table.extraPrice],
-                    approved = row[table.approved]
+                    accepted = row[table.accepted],
+                    completed = row[table.completed]
                 )
 
             }
@@ -65,7 +71,8 @@ object OfferRepository {
                     offerReceiverProductId = row[table.offerReceiverProductId],
                     offeredProductIds = Json.decodeFromString(row[table.offeredProductIds]),
                     extraPrice = row[table.extraPrice],
-                    approved = row[table.approved]
+                    accepted = row[table.accepted],
+                    completed = row[table.completed]
                 )
 
             }
@@ -73,13 +80,26 @@ object OfferRepository {
         }
 
 
-    suspend fun approveOffer(id: Long, approved: Boolean) = suspendTransaction {
+    suspend fun acceptOffer(id: Long, approved: Boolean) = suspendTransaction {
         dao.findByIdAndUpdate(id) { offer ->
-            offer.approved = approved
+            offer.accepted = approved
         }?.also {
-            exposedLogger.info("offer approved by seller =  ${it.approved}")
-            it.approved
+            exposedLogger.info("offer approved by seller =  ${it.accepted}")
+            it.accepted
         } ?: false
+    }
+
+    private fun toModel(offerDao: OfferDao) = offerDao.run {
+        Offer(
+            id = id.value,
+            offerMakerId = offerMakerId,
+            offerReceiverId = offerReceiverId,
+            offerReceiverProductId = offerReceiverProductId,
+            offeredProductIds = Json.decodeFromString(offeredProductIds),
+            extraPrice = extraPrice,
+            accepted = accepted,
+            completed = completed
+        )
     }
 
 }

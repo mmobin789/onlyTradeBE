@@ -8,5 +8,6 @@ object OfferTable : LongIdTable("offer") {
     val offeredProductIds = text("offeredProductIds")
     val offerReceiverProductId = long("offerReceiverProductId")
     val extraPrice = double("extraPrice")
-    val approved = bool("approved").default(false)
+    val accepted = bool("accepted").default(false)
+    val completed = bool("completed").default(false)
 }
