@@ -28,6 +28,7 @@ object OfferRepository {
     }
 
     fun getOffersByProductId(productId: Long) =
+        //todo add limit to offers.  (like if there are 50 offers keep adding them but don't return to clients unless old offers are rejected.
         dao.find { table.offerReceiverProductId eq productId }.map(::toModel)
 
 
