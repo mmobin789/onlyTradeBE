@@ -107,7 +107,6 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                 val imageUrls = productImages.mapIndexed { index, bytes ->
                     async {
                         val folderPath = ImageUploadService.buildImagePath(
-                            rootFolderName = "products",
                             userId = user.id,
                             categoryId = 786, // TODO: Get from CategoryRepo based on subcategory.
                             subcategoryId = addProductRequest!!.product.subcategoryId,
