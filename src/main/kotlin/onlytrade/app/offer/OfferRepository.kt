@@ -7,6 +7,7 @@ import onlytrade.app.offer.data.dao.OfferDao
 import onlytrade.app.offer.data.table.OfferTable
 import onlytrade.app.viewmodel.product.offer.repository.data.db.Offer
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
@@ -29,12 +30,23 @@ object OfferRepository {
 
     fun getOffersByProductId(productId: Long) =
         //todo add limit to offers.  (like if there are 50 offers keep adding them but don't return to clients unless old offers are rejected.
-        dao.find { table.offerReceiverProductId eq productId }.map(::toModel)
+        dao.find { table.offerReceiverProductId eq productId }.limit(50).map(::toModel)
 
 
-    suspend fun getOffersMade(userId: Long, pageNo: Int, pageSize: Int) =
+    suspend fun getOfferMade(offerMakerId: Long, productId: Long) = suspendTransaction {
+        dao.find((table.offerMakerId eq offerMakerId) and (table.offerReceiverProductId eq productId))
+            .firstOrNull()?.let(::toModel)
+    }
+
+    suspend fun getOfferReceived(offerReceiverId: Long, productId: Long) = suspendTransaction {
+        dao.find((table.offerReceiverId eq offerReceiverId) and (table.offerReceiverProductId eq productId))
+            .firstOrNull()?.let(::toModel)
+    }
+
+
+    suspend fun getOffersMade(offerMakerId: Long, pageNo: Int, pageSize: Int) =
         suspendTransaction {
-            var query = table.selectAll().where(table.offerMakerId eq userId)
+            var query = table.selectAll().where(table.offerMakerId eq offerMakerId)
             query = if (pageNo > 1) {    // 2..20..3..40..4..60
                 val offset = ((pageSize * pageNo) - pageSize).toLong()
                 query.offset(offset).limit(pageSize)
@@ -56,9 +68,9 @@ object OfferRepository {
 
         }
 
-    suspend fun getOffersReceived(userId: Long, pageNo: Int, pageSize: Int) =
+    suspend fun getOffersReceived(offerReceiverId: Long, pageNo: Int, pageSize: Int) =
         suspendTransaction {
-            var query = table.selectAll().where(table.offerReceiverId eq userId)
+            var query = table.selectAll().where(table.offerReceiverId eq offerReceiverId)
             query = if (pageNo > 1) {    // 2..20..3..40..4..60
                 val offset = ((pageSize * pageNo) - pageSize).toLong()
                 query.offset(offset).limit(pageSize)
