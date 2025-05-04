@@ -6,6 +6,7 @@ import onlytrade.app.db.suspendTransaction
 import onlytrade.app.offer.data.dao.OfferDao
 import onlytrade.app.offer.data.table.OfferTable
 import onlytrade.app.viewmodel.product.offer.repository.data.db.Offer
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.exposedLogger
@@ -52,19 +53,7 @@ object OfferRepository {
                 query.offset(offset).limit(pageSize)
             } else query.limit(pageSize)
 
-            query.map { row ->
-                Offer(
-                    id = row[table.id].value,
-                    offerMakerId = row[table.offerMakerId],
-                    offerReceiverId = row[table.offerReceiverId],
-                    offerReceiverProductId = row[table.offerReceiverProductId],
-                    offeredProductIds = Json.decodeFromString(row[table.offeredProductIds]),
-                    extraPrice = row[table.extraPrice],
-                    accepted = row[table.accepted],
-                    completed = row[table.completed]
-                )
-
-            }
+            query.map(::toModel)
 
         }
 
@@ -76,19 +65,7 @@ object OfferRepository {
                 query.offset(offset).limit(pageSize)
             } else query.limit(pageSize)
 
-            query.map { row ->
-                Offer(
-                    id = row[table.id].value,
-                    offerMakerId = row[table.offerMakerId],
-                    offerReceiverId = row[table.offerReceiverId],
-                    offerReceiverProductId = row[table.offerReceiverProductId],
-                    offeredProductIds = Json.decodeFromString(row[table.offeredProductIds]),
-                    extraPrice = row[table.extraPrice],
-                    accepted = row[table.accepted],
-                    completed = row[table.completed]
-                )
-
-            }
+            query.map(::toModel)
 
         }
 
@@ -114,5 +91,16 @@ object OfferRepository {
             completed = completed
         )
     }
+
+    private fun toModel(row: ResultRow) = Offer(
+        id = row[table.id].value,
+        offerMakerId = row[table.offerMakerId],
+        offerReceiverId = row[table.offerReceiverId],
+        offerReceiverProductId = row[table.offerReceiverProductId],
+        offeredProductIds = Json.decodeFromString(row[table.offeredProductIds]),
+        extraPrice = row[table.extraPrice],
+        accepted = row[table.accepted],
+        completed = row[table.completed]
+    )
 
 }
