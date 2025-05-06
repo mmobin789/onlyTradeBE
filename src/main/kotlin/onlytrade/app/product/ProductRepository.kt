@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
-object ProductsRepository {
+object ProductRepository {
     private val offerRepository = OfferRepository
     private val table = ProductTable
     private val dao = ProductDao

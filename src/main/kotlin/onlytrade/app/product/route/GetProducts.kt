@@ -5,7 +5,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.util.logging.Logger
-import onlytrade.app.product.ProductsRepository
+import onlytrade.app.product.ProductRepository
 import onlytrade.app.viewmodel.product.repository.data.remote.response.GetProductsResponse
 
 fun Route.getProducts(logger: Logger) {
@@ -17,7 +17,7 @@ fun Route.getProducts(logger: Logger) {
 
         logger.info("GetProductService: pageSize=$pageSize, pageNo=$pageNo, userId=$userId")
 
-        val products = ProductsRepository.getProducts(
+        val products = ProductRepository.getProducts(
             pageNo = pageNo,
             pageSize = pageSize,
             userId = userId

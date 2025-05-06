@@ -20,8 +20,8 @@ import kotlinx.serialization.json.Json
 import onlytrade.app.login.data.JwtConfig
 import onlytrade.app.login.data.JwtConfig.JWT_USERNAME_CLAIM
 import onlytrade.app.login.data.user.UserRepository.findUserByCredential
-import onlytrade.app.product.ProductsRepository
-import onlytrade.app.product.ProductsRepository.setProductImages
+import onlytrade.app.product.ProductRepository
+import onlytrade.app.product.ProductRepository.setProductImages
 import onlytrade.app.utils.ImageUploadService
 import onlytrade.app.viewmodel.product.repository.data.remote.request.AddProductRequest
 import onlytrade.app.viewmodel.product.repository.data.remote.response.AddProductResponse
@@ -99,7 +99,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
 
                 log.info("Product Images Found:${productImages.size}")
 
-                val productId = ProductsRepository.addProduct(
+                val productId = ProductRepository.addProduct(
                     userId = user.id, product = addProductRequest?.product!!
                 )
 
