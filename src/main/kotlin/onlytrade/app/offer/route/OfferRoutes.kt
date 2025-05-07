@@ -7,4 +7,5 @@ fun Route.offerRoutes(logger: Logger) {
     addOffer(logger)
     getOfferMade(logger)
     getOfferReceived(logger)
+    getOffers()
 }

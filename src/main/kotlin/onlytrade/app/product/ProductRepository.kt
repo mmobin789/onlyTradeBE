@@ -5,6 +5,7 @@ import onlytrade.app.offer.OfferRepository
 import onlytrade.app.product.data.dao.ProductDao
 import onlytrade.app.product.data.table.ProductTable
 import onlytrade.app.viewmodel.product.repository.data.db.Product
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
@@ -13,6 +14,22 @@ object ProductRepository {
     private val offerRepository = OfferRepository
     private val table = ProductTable
     private val dao = ProductDao
+
+    fun getProductsByIds(ids: Set<Long>) =
+        dao.forIds(ids.toList()).map { dao ->
+            Product(
+                id = dao.id.value,
+                categoryId = dao.categoryId,
+                subcategoryId = dao.subcategoryId,
+                userId = dao.userId,
+                name = dao.name,
+                description = dao.description,
+                estPrice = dao.estPrice,
+                imageUrls = dao.imageUrls.split(","),
+                offers = offerRepository.getOffersByProductId(dao.id.value)
+                    .ifEmpty { null }
+            )
+        }
 
     suspend fun getProducts(pageNo: Int, pageSize: Int, userId: Long? = null) =
         suspendTransaction {
@@ -25,20 +42,7 @@ object ProductRepository {
                 query.offset(offset).limit(pageSize)
             } else query.limit(pageSize)
 
-            query.map { row ->
-                Product(
-                    id = row[table.id].value,
-                    categoryId = row[table.categoryId],
-                    subcategoryId = row[table.subcategoryId],
-                    userId = row[table.userId],
-                    name = row[table.name],
-                    description = row[table.description],
-                    estPrice = row[table.estPrice],
-                    imageUrls = row[table.imageUrls].split(","),
-                    offers = offerRepository.getOffersByProductId(row[table.id].value)
-                        .ifEmpty { null }
-                )
-            }
+            query.map(::toModel)
 
         }
 
@@ -68,5 +72,16 @@ object ProductRepository {
         }
     }
 
-
+    private fun toModel(row: ResultRow) = Product(
+        id = row[table.id].value,
+        categoryId = row[table.categoryId],
+        subcategoryId = row[table.subcategoryId],
+        userId = row[table.userId],
+        name = row[table.name],
+        description = row[table.description],
+        estPrice = row[table.estPrice],
+        imageUrls = row[table.imageUrls].split(","),
+        offers = offerRepository.getOffersByProductId(row[table.id].value)
+            .ifEmpty { null }
+    )
 }

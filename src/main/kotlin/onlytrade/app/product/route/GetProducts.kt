@@ -15,7 +15,7 @@ fun Route.getProducts(logger: Logger) {
         val pageNo = params["page"]?.toIntOrNull() ?: 1
         val userId = params["uid"]?.toLongOrNull()
 
-        logger.info("GetProductService: pageSize=$pageSize, pageNo=$pageNo, userId=$userId")
+        logger.info("GetProductsService: pageSize=$pageSize, pageNo=$pageNo, userId=$userId")
 
         val products = ProductRepository.getProducts(
             pageNo = pageNo,
