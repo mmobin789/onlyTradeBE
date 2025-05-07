@@ -100,7 +100,7 @@ object OfferRepository {
         } ?: false
     }
 
-    suspend fun deleteOffer(id: Long): Boolean = suspendTransaction {
+    suspend fun deleteOffer(id: Long) = suspendTransaction {
         dao.findById(id)?.let {
             it.delete()
             true
