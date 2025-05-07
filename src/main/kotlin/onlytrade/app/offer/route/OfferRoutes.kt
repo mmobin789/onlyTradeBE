@@ -5,7 +5,5 @@ import io.ktor.util.logging.Logger
 
 fun Route.offerRoutes(logger: Logger) {
     addOffer(logger)
-    getOfferMade(logger)
-    getOfferReceived(logger)
     getOffers()
 }

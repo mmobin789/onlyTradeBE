@@ -8,8 +8,6 @@ import onlytrade.app.offer.data.table.OfferTable
 import onlytrade.app.product.ProductRepository
 import onlytrade.app.viewmodel.product.offer.repository.data.db.Offer
 import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
@@ -37,18 +35,18 @@ object OfferRepository {
     /**
      * Returns the 1st offer made only or null.
      */
-    suspend fun getOfferMade(offerMakerId: Long, productId: Long) = suspendTransaction {
-        dao.find((table.offerMakerId eq offerMakerId) and (table.offerReceiverProductId eq productId))
-            .firstOrNull()?.let(::toModel)
-    }
+    /*  suspend fun getOfferMade(offerMakerId: Long, productId: Long) = suspendTransaction {
+          dao.find((table.offerMakerId eq offerMakerId) and (table.offerReceiverProductId eq productId))
+              .firstOrNull()?.let(::toModel)
+      }*/
 
     /**
      * Returns the 1st offer received only or null.
      */
-    suspend fun getOfferReceived(offerReceiverId: Long, productId: Long) = suspendTransaction {
-        dao.find((table.offerReceiverId eq offerReceiverId) and (table.offerReceiverProductId eq productId))
-            .firstOrNull()?.let(::toModel)
-    }
+    /*   suspend fun getOfferReceived(offerReceiverId: Long, productId: Long) = suspendTransaction {
+           dao.find((table.offerReceiverId eq offerReceiverId) and (table.offerReceiverProductId eq productId))
+               .firstOrNull()?.let(::toModel)
+       }*/
 
     /**
      * Returns all offers.
