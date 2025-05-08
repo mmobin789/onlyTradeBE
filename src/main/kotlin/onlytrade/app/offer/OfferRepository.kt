@@ -8,6 +8,8 @@ import onlytrade.app.offer.data.table.OfferTable
 import onlytrade.app.product.ProductRepository
 import onlytrade.app.viewmodel.product.offer.repository.data.db.Offer
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
@@ -90,6 +92,12 @@ object OfferRepository {
             }
     */
 
+    suspend fun getOfferMade(offerMakerId: Long, offerReceiverProductId: Long) =
+        suspendTransaction {
+            dao.find((table.offerMakerId eq offerMakerId) and (table.offerReceiverProductId eq offerReceiverProductId))
+                .firstOrNull()?.let(::toModel)
+        }
+
 
     suspend fun acceptOffer(id: Long, approved: Boolean) = suspendTransaction {
         dao.findByIdAndUpdate(id) { offer ->
@@ -117,7 +125,8 @@ object OfferRepository {
             offeredProductIds = Json.decodeFromString(offeredProductIds),
             extraPrice = extraPrice,
             accepted = accepted,
-            completed = completed
+            completed = completed,
+            offeredProducts = emptyList()
         )
     }
 

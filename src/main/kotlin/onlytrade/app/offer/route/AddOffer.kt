@@ -38,15 +38,28 @@ fun Route.addOffer(log: Logger) = authenticate(JWT_AUTH) {
                     }
 
                     user?.id -> {
-                        val placedOffer = OfferRepository.addOffer(offer)
-                        val statusCode = HttpStatusCode.Created
-                        call.respond(
-                            statusCode,
-                            AddOfferResponse(
-                                offer = placedOffer,
-                                statusCode = statusCode.value,
+                        OfferRepository.getOfferMade(
+                            offerMakerId = user.id,
+                            offerReceiverProductId = offer.offerReceiverProductId
+                        )?.run {
+                            call.respond(
+                                AddOfferResponse(
+                                    statusCode = HttpStatusCode.OK.value,
+                                    error = HttpStatusCode.OK.description,
+                                    offer = this
+                                )
                             )
-                        )
+                        } ?: run {
+                            val placedOffer = OfferRepository.addOffer(offer)
+                            val statusCode = HttpStatusCode.Created
+                            call.respond(
+                                statusCode,
+                                AddOfferResponse(
+                                    offer = placedOffer,
+                                    statusCode = statusCode.value,
+                                )
+                            )
+                        }
                     }
 
                     else -> {
