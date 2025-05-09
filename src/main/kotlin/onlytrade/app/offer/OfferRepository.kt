@@ -7,6 +7,7 @@ import onlytrade.app.offer.data.dao.OfferDao
 import onlytrade.app.offer.data.table.OfferTable
 import onlytrade.app.product.ProductRepository
 import onlytrade.app.viewmodel.product.offer.repository.data.db.Offer
+import onlytrade.app.viewmodel.product.offer.repository.data.remote.request.AddOfferRequest
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
@@ -18,13 +19,13 @@ object OfferRepository {
     private val dao = OfferDao
     private val productRepository = ProductRepository
 
-    suspend fun addOffer(offer: Offer) = suspendTransaction {
+    suspend fun addOffer(addOfferRequest: AddOfferRequest) = suspendTransaction {
         dao.new {
-            this.offerMakerId = offer.offerMakerId
-            this.offerReceiverId = offer.offerReceiverId
-            this.offerReceiverProductId = offer.offerReceiverProductId
-            this.offeredProductIds = Json.encodeToString(offer.offeredProductIds)
-            this.extraPrice = offer.extraPrice
+            this.offerMakerId = addOfferRequest.offerMakerId
+            this.offerReceiverId = addOfferRequest.offerReceiverId
+            this.offerReceiverProductId = addOfferRequest.offerReceiverProductId
+            this.offeredProductIds = Json.encodeToString(addOfferRequest.offeredProductIds)
+            this.extraPrice = 0.0  //todo addOfferRequest.extraPrice
         }.let {
             exposedLogger.info("Offer Added :${it.id.value}")
             toModel(it)

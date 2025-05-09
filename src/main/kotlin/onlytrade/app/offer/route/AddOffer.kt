@@ -23,10 +23,9 @@ fun Route.addOffer(log: Logger) = authenticate(JWT_AUTH) {
             log.info("User Found:${user?.id}")
             try {
                 val addOfferRequest = call.receive<AddOfferRequest>()
-                val offer = addOfferRequest.offer
 
-                when (offer.offerMakerId) {
-                    offer.offerReceiverId -> { //illogical case.
+                when (addOfferRequest.offerMakerId) {
+                    addOfferRequest.offerReceiverId -> { //illogical case.
                         val statusCode = HttpStatusCode.BadRequest
                         call.respond(
                             statusCode,
@@ -40,7 +39,7 @@ fun Route.addOffer(log: Logger) = authenticate(JWT_AUTH) {
                     user?.id -> {
                         OfferRepository.getOfferMade(
                             offerMakerId = user.id,
-                            offerReceiverProductId = offer.offerReceiverProductId
+                            offerReceiverProductId = addOfferRequest.offerReceiverProductId
                         )?.run {
                             call.respond(
                                 AddOfferResponse(
@@ -50,7 +49,7 @@ fun Route.addOffer(log: Logger) = authenticate(JWT_AUTH) {
                                 )
                             )
                         } ?: run {
-                            val placedOffer = OfferRepository.addOffer(offer)
+                            val placedOffer = OfferRepository.addOffer(addOfferRequest)
                             val statusCode = HttpStatusCode.Created
                             call.respond(
                                 statusCode,
