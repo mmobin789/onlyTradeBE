@@ -100,9 +100,9 @@ object OfferRepository {
         }
 
 
-    suspend fun acceptOffer(id: Long, approved: Boolean) = suspendTransaction {
+    suspend fun acceptOffer(id: Long) = suspendTransaction {
         dao.findByIdAndUpdate(id) { offer ->
-            offer.accepted = approved
+            offer.accepted = true
         }?.let {
             exposedLogger.info("offer accepted = ${it.accepted}")
             it.accepted
