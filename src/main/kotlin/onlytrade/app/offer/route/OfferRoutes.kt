@@ -8,4 +8,5 @@ fun Route.offerRoutes(logger: Logger) {
     getOffers()
     deleteOffer()
     acceptOffer(logger)
+    completeOffer(logger)
 }

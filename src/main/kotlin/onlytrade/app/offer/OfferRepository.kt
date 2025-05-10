@@ -109,6 +109,15 @@ object OfferRepository {
         } ?: false
     }
 
+    suspend fun completeOffer(id: Long) = suspendTransaction {
+        dao.findByIdAndUpdate(id) { offer ->
+            offer.completed = true
+        }?.let {
+            exposedLogger.info("offer completed = ${it.completed}")
+            it.completed
+        } ?: false
+    }
+
     suspend fun deleteOffer(id: Long) = suspendTransaction {
         dao.findById(id)?.let {
             it.delete()
