@@ -52,7 +52,7 @@ object OfferRepository {
        }*/
 
     /**
-     * Returns all offers.
+     * Returns all incomplete offers.
      * The number of offers will not exceed 20 for retrieval.
      */
     suspend fun getOffers() =
@@ -63,7 +63,7 @@ object OfferRepository {
                     query.offset(offset).limit(pageSize)
                 } else query.limit(pageSize)*/
 
-            table.selectAll().limit(20).map(::toModel)
+            table.selectAll().where(table.completed.eq(false)).limit(20).map(::toModel)
 
         }
 
