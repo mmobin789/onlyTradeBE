@@ -30,116 +30,122 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
     post("/product/add") {
         call.principal<JWTPrincipal>()?.run {
             val username = payload.getClaim(JWT_USERNAME_CLAIM).asString()
-            val user = findUserByCredential(credential = username)!!
-            log.info("User Found:${user.id}")
-            var addProductRequest: AddProductRequest? = null
-            var isError = false
-            withContext(Dispatchers.IO) {
-                val productImages = ArrayList<ByteArray>(15)
-                try {
-                    val multipart = call.receiveMultipart()
-                    multipart.forEachPart { part ->
-                        log.info("Received part: ${part.name}, Type: ${part::class.simpleName}")
-                        if (part is PartData.FileItem && part.name?.contains("productImage") == true) {
-                            log.info("Add Product Request Image Received:${part.name}")
-                            try {
-                                part.provider()
-                                    .toInputStream().use {
-                                        productImages.add(it.readBytes())
+            findUserByCredential(credential = username)?.run {
+                log.info("User Found:${id}")
+                var addProductRequest: AddProductRequest? = null
+                var isError = false
+                withContext(Dispatchers.IO) {
+                    val productImages = ArrayList<ByteArray>(15)
+                    try {
+                        val multipart = call.receiveMultipart()
+                        multipart.forEachPart { part ->
+                            log.info("Received part: ${part.name}, Type: ${part::class.simpleName}")
+                            if (part is PartData.FileItem && part.name?.contains("productImage") == true) {
+                                log.info("Add Product Request Image Received:${part.name}")
+                                try {
+                                    part.provider()
+                                        .toInputStream().use {
+                                            productImages.add(it.readBytes())
 
-                                    }
-                            } catch (e: Exception) {
-                                isError = true
-                                val error = "Failed to read product image part: ${e.message}"
-                                log.error(error)
-                                val statusCode = HttpStatusCode.NotAcceptable
-                                call.respond(
-                                    statusCode,
-                                    AddProductResponse(
-                                        statusCode = statusCode.value,
-                                        error = error
+                                        }
+                                } catch (e: Exception) {
+                                    isError = true
+                                    val error = "Failed to read product image part: ${e.message}"
+                                    log.error(error)
+                                    val statusCode = HttpStatusCode.NotAcceptable
+                                    call.respond(
+                                        statusCode,
+                                        AddProductResponse(
+                                            statusCode = statusCode.value,
+                                            error = error
+                                        )
                                     )
-                                )
-                                return@forEachPart
-                            }
-                        } else if (part is PartData.FormItem && part.name == "AddProductRequest") {
-                            addProductRequest = try {
-                                Json.decodeFromString<AddProductRequest>(part.value).also {
-                                    log.info("Add Product Request Received:${part.value}")
+                                    return@forEachPart
                                 }
-                            } catch (e: Exception) {
-                                isError = true
-                                val error = "Failed to read AddProductRequest part: ${e.message}"
-                                log.error(error)
-                                val statusCode = HttpStatusCode.NotAcceptable
-                                call.respond(
-                                    statusCode,
-                                    AddProductResponse(statusCode = statusCode.value, error = error)
-                                )
-                                return@forEachPart
+                            } else if (part is PartData.FormItem && part.name == "AddProductRequest") {
+                                addProductRequest = try {
+                                    Json.decodeFromString<AddProductRequest>(part.value).also {
+                                        log.info("Add Product Request Received:${part.value}")
+                                    }
+                                } catch (e: Exception) {
+                                    isError = true
+                                    val error =
+                                        "Failed to read AddProductRequest part: ${e.message}"
+                                    log.error(error)
+                                    val statusCode = HttpStatusCode.NotAcceptable
+                                    call.respond(
+                                        statusCode,
+                                        AddProductResponse(
+                                            statusCode = statusCode.value,
+                                            error = error
+                                        )
+                                    )
+                                    return@forEachPart
+                                }
+
+
                             }
-
-
+                            part.dispose()
                         }
-                        part.dispose()
+
+                    } catch (e: Exception) {
+                        isError = true
+                        val statusCode = HttpStatusCode.BadRequest
+                        log.error(e.message)
+                        call.respond(
+                            statusCode,
+                            AddProductResponse(statusCode = statusCode.value, error = e.message)
+                        )
                     }
-                } catch (e: Exception) {
-                    isError = true
-                    val statusCode = HttpStatusCode.BadRequest
-                    log.error(e.message)
+
+                    if (isError) {
+                        return@withContext
+                    }
+
+                    log.info("Product Images Found:${productImages.size}")
+
+                    val productId = ProductRepository.addProduct(
+                        userId = id, product = addProductRequest?.product!!
+                    )
+
+                    // ✅ Step 2: Upload images in parallel
+                    val imageUrls = productImages.mapIndexed { index, bytes ->
+                        async {
+                            val folderPath = ImageUploadService.buildImagePath(
+                                userId = id,
+                                categoryId = 786, // TODO: Get from CategoryRepo based on subcategory.
+                                subcategoryId = addProductRequest!!.product.subcategoryId,
+                                productId = productId
+                            )
+                            ImageUploadService.uploadFile(
+                                name = "productImage${index + 1}.jpg",
+                                folderPath = folderPath,
+                                byteArray = bytes
+                            )
+                        }
+                    }.awaitAll().filterNotNull().joinToString(",") // ✅ Collect all URLs
+
+                    log.info("Product Image URLs: $imageUrls")
+
+                    // ✅ Step 3: Update product with image URLs
+                    setProductImages(productId, imageUrls)
+                    val statusCode = HttpStatusCode.Created
                     call.respond(
-                        statusCode,
-                        AddProductResponse(statusCode = statusCode.value, error = e.message)
+                        statusCode, AddProductResponse(
+                            statusCode = statusCode.value
+                        )
                     )
                 }
-
-                if (isError) {
-                    return@withContext
-                }
-
-                log.info("Product Images Found:${productImages.size}")
-
-                val productId = ProductRepository.addProduct(
-                    userId = user.id, product = addProductRequest?.product!!
-                )
-
-                // ✅ Step 2: Upload images in parallel
-                val imageUrls = productImages.mapIndexed { index, bytes ->
-                    async {
-                        val folderPath = ImageUploadService.buildImagePath(
-                            userId = user.id,
-                            categoryId = 786, // TODO: Get from CategoryRepo based on subcategory.
-                            subcategoryId = addProductRequest!!.product.subcategoryId,
-                            productId = productId
-                        )
-                        ImageUploadService.uploadFile(
-                            name = "productImage${index + 1}.jpg",
-                            folderPath = folderPath,
-                            byteArray = bytes
-                        )
-                    }
-                }.awaitAll().filterNotNull().joinToString(",") // ✅ Collect all URLs
-
-                log.info("Product Image URLs: $imageUrls")
-
-                // ✅ Step 3: Update product with image URLs
-                setProductImages(productId, imageUrls)
-                val statusCode = HttpStatusCode.Created
+            } ?: run {
+                val statusCode = HttpStatusCode.Unauthorized
                 call.respond(
-                    statusCode, AddProductResponse(
-                        statusCode = statusCode.value
+                    statusCode,
+                    AddProductResponse(
+                        statusCode = statusCode.value,
+                        error = statusCode.description
                     )
                 )
             }
-        } ?: run {
-            val statusCode = HttpStatusCode.Unauthorized
-            call.respond(
-                statusCode,
-                AddProductResponse(
-                    statusCode = statusCode.value,
-                    error = statusCode.description
-                )
-            )
         }
     }
 }

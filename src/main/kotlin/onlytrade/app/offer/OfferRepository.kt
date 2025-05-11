@@ -67,32 +67,6 @@ object OfferRepository {
 
         }
 
-    /*
-        suspend fun getOffersMade(offerMakerId: Long, pageNo: Int, pageSize: Int) =
-            suspendTransaction {
-                var query = table.selectAll().where(table.offerMakerId eq offerMakerId)
-                query = if (pageNo > 1) {    // 2..20..3..40..4..60
-                    val offset = ((pageSize * pageNo) - pageSize).toLong()
-                    query.offset(offset).limit(pageSize)
-                } else query.limit(pageSize)
-
-                query.map(::toModel)
-
-            }
-
-        suspend fun getOffersReceived(offerReceiverId: Long, pageNo: Int, pageSize: Int) =
-            suspendTransaction {
-                var query = table.selectAll().where(table.offerReceiverId eq offerReceiverId)
-                query = if (pageNo > 1) {    // 2..20..3..40..4..60
-                    val offset = ((pageSize * pageNo) - pageSize).toLong()
-                    query.offset(offset).limit(pageSize)
-                } else query.limit(pageSize)
-
-                query.map(::toModel)
-
-            }
-    */
-
     suspend fun getOfferMade(offerMakerId: Long, offerReceiverProductId: Long) =
         suspendTransaction {
             dao.find((table.offerMakerId eq offerMakerId) and (table.offerReceiverProductId eq offerReceiverProductId))

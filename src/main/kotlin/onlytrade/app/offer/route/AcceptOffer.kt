@@ -35,10 +35,12 @@ fun Route.acceptOffer(log: Logger) = authenticate(JWT_AUTH) {
                         )
                     )
                 } else if (OfferRepository.acceptOffer(offerId)) {
+                    val status = HttpStatusCode.Accepted
                     call.respond(
+                        status = status,
                         AcceptOfferResponse(
-                            statusCode = HttpStatusCode.Accepted.value,
-                            error = HttpStatusCode.Accepted.description,
+                            statusCode = status.value,
+                            error = status.description,
                             acceptedOfferId = offerId
                         )
                     )

@@ -35,10 +35,12 @@ fun Route.completeOffer(log: Logger) = authenticate(JWT_AUTH) {
                         )
                     )
                 } else if (OfferRepository.completeOffer(offerId)) {
+                    val status = HttpStatusCode.Accepted
                     call.respond(
+                        status,
                         CompleteOfferResponse(
-                            statusCode = HttpStatusCode.Accepted.value,
-                            error = HttpStatusCode.Accepted.description,
+                            statusCode = status.value,
+                            error = status.description,
                             completedOfferId = offerId
                         )
                     )
