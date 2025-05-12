@@ -15,5 +15,6 @@ class ProductDao(id: EntityID<Long>) : LongEntity(id) {
     var estPrice by ProductTable.estPrice
     var description by ProductTable.description
     var imageUrls by ProductTable.imageUrls
+    var traded by ProductTable.traded
 
 }

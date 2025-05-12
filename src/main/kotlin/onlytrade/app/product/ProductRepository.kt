@@ -5,8 +5,10 @@ import onlytrade.app.offer.OfferRepository
 import onlytrade.app.product.data.dao.ProductDao
 import onlytrade.app.product.data.table.ProductTable
 import onlytrade.app.viewmodel.product.repository.data.db.Product
+import onlytrade.app.viewmodel.product.repository.data.remote.request.AddProductRequest
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
@@ -14,6 +16,15 @@ object ProductRepository {
     private val offerRepository = OfferRepository
     private val table = ProductTable
     private val dao = ProductDao
+
+    fun getProductById(id: Long): Product? = dao.findById(id)?.let(::toModel)
+
+    fun setTraded(id: Long) = dao.findByIdAndUpdate(id) { product ->
+        product.traded = true
+    }?.let {
+        exposedLogger.info("Product Traded = ${it.traded}")
+        it.traded
+    } ?: false
 
     fun getProductsByIds(ids: Set<Long>) =
         dao.forIds(ids.toList()).map { dao ->
@@ -26,16 +37,19 @@ object ProductRepository {
                 description = dao.description,
                 estPrice = dao.estPrice,
                 imageUrls = dao.imageUrls.split(","),
-                offers = offerRepository.getOffersByProductId(dao.id.value)
-                    .ifEmpty { null }
+                traded = dao.traded,
+                offers = emptyList()
             )
         }
 
     suspend fun getProducts(pageNo: Int, pageSize: Int, userId: Long? = null) =
         suspendTransaction {
+            var notTraded = table.traded eq false
             var query = table.selectAll()
             if (userId != null)
-                query = query.where(table.userId eq userId)
+                notTraded = notTraded and (table.userId eq userId)
+
+            query = query.where(notTraded)
 
             query = if (pageNo > 1) {    // 2..20..3..40..4..60
                 val offset = ((pageSize * pageNo) - pageSize).toLong()
@@ -49,15 +63,15 @@ object ProductRepository {
     /**
      * Returns the id of product on successful insertion.
      */
-    suspend fun addProduct(userId: Long, product: Product) =
+    suspend fun addProduct(userId: Long, addProductRequest: AddProductRequest) =
         suspendTransaction {
             dao.new {
                 this.userId = userId
-                categoryId = product.categoryId
-                subcategoryId = product.subcategoryId
-                name = product.name
-                description = product.description
-                estPrice = product.estPrice
+                categoryId = addProductRequest.categoryId
+                subcategoryId = addProductRequest.subcategoryId
+                name = addProductRequest.name
+                description = addProductRequest.description
+                estPrice = addProductRequest.estPrice
                 imageUrls = "ImageURLs to be added"
             }.id.value.also {
                 exposedLogger.info("Product Added :$it")
@@ -81,7 +95,20 @@ object ProductRepository {
         description = row[table.description],
         estPrice = row[table.estPrice],
         imageUrls = row[table.imageUrls].split(","),
+        traded = row[table.traded],
         offers = offerRepository.getOffersByProductId(row[table.id].value)
             .ifEmpty { null }
+    )
+
+    private fun toModel(productDao: ProductDao) = Product(
+        id = productDao.id.value,
+        categoryId = productDao.categoryId,
+        subcategoryId = productDao.subcategoryId,
+        userId = productDao.userId,
+        name = productDao.name,
+        description = productDao.description,
+        estPrice = productDao.estPrice,
+        imageUrls = productDao.imageUrls.split(","),
+        traded = productDao.traded
     )
 }

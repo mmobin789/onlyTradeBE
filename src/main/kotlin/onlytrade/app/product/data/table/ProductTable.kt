@@ -12,4 +12,5 @@ object ProductTable : LongIdTable(name = "product") {
     val estPrice = double("est_price")
     val imageUrls = text("image_urls")
     val approved = bool("approved").default(false)
+    val traded = bool("traded").default(false)
 }

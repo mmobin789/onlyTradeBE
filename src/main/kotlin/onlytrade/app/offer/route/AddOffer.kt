@@ -41,11 +41,12 @@ fun Route.addOffer(log: Logger) = authenticate(JWT_AUTH) {
                             offerMakerId = user.id,
                             offerReceiverProductId = addOfferRequest.offerReceiverProductId
                         )?.run {
+                            val status = HttpStatusCode.Conflict
                             call.respond(
+                                status,
                                 AddOfferResponse(
-                                    statusCode = HttpStatusCode.OK.value,
-                                    error = HttpStatusCode.OK.description,
-                                    offer = this
+                                    statusCode = status.value,
+                                    error = status.description
                                 )
                             )
                         } ?: run {

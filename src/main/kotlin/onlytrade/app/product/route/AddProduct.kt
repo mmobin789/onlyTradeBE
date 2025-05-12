@@ -105,7 +105,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                     log.info("Product Images Found:${productImages.size}")
 
                     val productId = ProductRepository.addProduct(
-                        userId = id, product = addProductRequest?.product!!
+                        userId = id, addProductRequest = addProductRequest!!
                     )
 
                     // ✅ Step 2: Upload images in parallel
@@ -113,8 +113,8 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                         async {
                             val folderPath = ImageUploadService.buildImagePath(
                                 userId = id,
-                                categoryId = 786, // TODO: Get from CategoryRepo based on subcategory.
-                                subcategoryId = addProductRequest!!.product.subcategoryId,
+                                categoryId = addProductRequest!!.categoryId,
+                                subcategoryId = addProductRequest!!.subcategoryId,
                                 productId = productId
                             )
                             ImageUploadService.uploadFile(

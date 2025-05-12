@@ -32,8 +32,13 @@ object OfferRepository {
         }
     }
 
+    /**
+     * This method returns relevant unaccepted offers for a product.
+     * Used by getProducts api.
+     */
     fun getOffersByProductId(productId: Long) =
-        dao.find { table.offerReceiverProductId eq productId }.map(::toModel)
+        dao.find { table.offerReceiverProductId eq productId and (table.accepted eq false) }
+            .map(::toModel)
 
     /**
      * Returns the 1st offer made only or null.
@@ -75,11 +80,13 @@ object OfferRepository {
 
 
     suspend fun acceptOffer(id: Long) = suspendTransaction {
+        var productTraded = false
         dao.findByIdAndUpdate(id) { offer ->
             offer.accepted = true
+            productTraded = productRepository.setTraded(offer.offerReceiverProductId)
         }?.let {
             exposedLogger.info("offer accepted = ${it.accepted}")
-            it.accepted
+            it.accepted && productTraded
         } ?: false
     }
 
@@ -107,6 +114,7 @@ object OfferRepository {
             offerReceiverId = offerReceiverId,
             offerReceiverProductId = offerReceiverProductId,
             offeredProductIds = Json.decodeFromString(offeredProductIds),
+            offerReceiverProduct = productRepository.getProductById(offerReceiverProductId)!!,
             extraPrice = extraPrice,
             accepted = accepted,
             completed = completed,
@@ -121,6 +129,7 @@ object OfferRepository {
             offerMakerId = row[table.offerMakerId],
             offerReceiverId = row[table.offerReceiverId],
             offerReceiverProductId = row[table.offerReceiverProductId],
+            offerReceiverProduct = productRepository.getProductById(row[table.offerReceiverProductId])!!,
             offeredProductIds = offeredProductIds,
             extraPrice = row[table.extraPrice],
             accepted = row[table.accepted],
