@@ -68,7 +68,7 @@ object OfferRepository {
                     query.offset(offset).limit(pageSize)
                 } else query.limit(pageSize)*/
 
-            table.selectAll().where(table.completed.eq(false)).limit(20).map(::toModel)
+            table.selectAll().where(table.completed eq false).limit(20).map(::toModel)
 
         }
 
@@ -83,7 +83,16 @@ object OfferRepository {
         var productTraded = false
         dao.findByIdAndUpdate(id) { offer ->
             offer.accepted = true
-            productTraded = productRepository.setTraded(offer.offerReceiverProductId)
+            var productTradedCount = 0
+            val offeredProducts = Json.decodeFromString<Set<Long>>(offer.offeredProductIds)
+            if (productRepository.setTraded(offer.offerReceiverProductId)) {
+                productTradedCount = 1
+                offeredProducts.forEach {
+                    if (productRepository.setTraded(it))
+                        productTradedCount++
+                }
+            }
+            productTraded = productTradedCount == offeredProducts.size + 1
         }?.let {
             exposedLogger.info("offer accepted = ${it.accepted}")
             it.accepted && productTraded
@@ -112,8 +121,6 @@ object OfferRepository {
             id = id.value,
             offerMakerId = offerMakerId,
             offerReceiverId = offerReceiverId,
-            offerReceiverProductId = offerReceiverProductId,
-            offeredProductIds = Json.decodeFromString(offeredProductIds),
             offerReceiverProduct = productRepository.getProductById(offerReceiverProductId)!!,
             extraPrice = extraPrice,
             accepted = accepted,
@@ -128,9 +135,7 @@ object OfferRepository {
             id = row[table.id].value,
             offerMakerId = row[table.offerMakerId],
             offerReceiverId = row[table.offerReceiverId],
-            offerReceiverProductId = row[table.offerReceiverProductId],
             offerReceiverProduct = productRepository.getProductById(row[table.offerReceiverProductId])!!,
-            offeredProductIds = offeredProductIds,
             extraPrice = row[table.extraPrice],
             accepted = row[table.accepted],
             completed = row[table.completed],
