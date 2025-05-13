@@ -11,6 +11,7 @@ import onlytrade.app.viewmodel.product.offer.repository.data.remote.request.AddO
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
@@ -81,18 +82,22 @@ object OfferRepository {
 
     suspend fun acceptOffer(id: Long) = suspendTransaction {
         var productTraded = false
+        var deletedOfferedProductsOffers = 0
         dao.findByIdAndUpdate(id) { offer ->
             offer.accepted = true
             var productTradedCount = 0
             val offeredProducts = Json.decodeFromString<Set<Long>>(offer.offeredProductIds)
             if (productRepository.setTraded(offer.offerReceiverProductId)) {
                 productTradedCount = 1
-                offeredProducts.forEach {
-                    if (productRepository.setTraded(it))
+                offeredProducts.forEach { offeredProductId ->
+                    if (productRepository.setTraded(offeredProductId)) {
+                        deletedOfferedProductsOffers += table.deleteWhere { table.offerReceiverProductId eq offeredProductId }
                         productTradedCount++
+                    }
                 }
             }
-            productTraded = productTradedCount == offeredProducts.size + 1
+            productTraded =
+                productTradedCount == offeredProducts.size + 1 && deletedOfferedProductsOffers > 0
         }?.let {
             exposedLogger.info("offer accepted = ${it.accepted}")
             it.accepted && productTraded
