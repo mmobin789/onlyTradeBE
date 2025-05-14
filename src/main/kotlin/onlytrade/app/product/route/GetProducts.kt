@@ -23,7 +23,7 @@ fun Route.getProducts(logger: Logger) {
             userId = userId
         )
         if (products.isNotEmpty()) {
-            val statusCode = HttpStatusCode.OK
+            val statusCode = HttpStatusCode.PartialContent
             call.respond(statusCode, GetProductsResponse(statusCode.value, products))
         } else {
             val statusCode = HttpStatusCode.NotFound

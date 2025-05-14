@@ -51,7 +51,8 @@ fun Route.addOffer(log: Logger) = authenticate(JWT_AUTH) {
                             )
                         } ?: run {
                             val placedOffer = OfferRepository.addOffer(addOfferRequest)
-                            val statusCode = HttpStatusCode.Created
+                            val statusCode =
+                                if (placedOffer != null) HttpStatusCode.Created else HttpStatusCode.NotAcceptable
                             call.respond(
                                 statusCode,
                                 AddOfferResponse(
@@ -59,6 +60,7 @@ fun Route.addOffer(log: Logger) = authenticate(JWT_AUTH) {
                                     statusCode = statusCode.value,
                                 )
                             )
+
                         }
                     }
 

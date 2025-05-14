@@ -21,6 +21,11 @@ object OfferRepository {
     private val productRepository = ProductRepository
 
     suspend fun addOffer(addOfferRequest: AddOfferRequest) = suspendTransaction {
+
+        if (getOffersByProductId(addOfferRequest.offerReceiverProductId).size > 20) {
+            return@suspendTransaction null
+        }
+
         dao.new {
             this.offerMakerId = addOfferRequest.offerMakerId
             this.offerReceiverId = addOfferRequest.offerReceiverId
