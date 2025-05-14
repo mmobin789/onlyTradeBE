@@ -19,12 +19,13 @@ object ImageUploadService {
     }
 
     fun buildImagePath(
-        rootFolderName: String,
         userId: Long,
         categoryId: Long,
         subcategoryId: Long,
         productId: Long
-    ) = "$rootFolderName/$userId/$categoryId/$subcategoryId/$productId"
+    ) = "${
+        if (System.getenv("BASE_URL").contains("-dev")) "dev" else "prod"
+    }/products/$userId/$categoryId/$subcategoryId/$productId"
 
     fun uploadFile(
         name: String,

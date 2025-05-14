@@ -2,9 +2,9 @@ package onlytrade.app.login.data.user
 
 import onlytrade.app.db.suspendTransaction
 import onlytrade.app.login.data.user.dao.UserDAO
-import onlytrade.app.login.data.user.mapper.toModel
 import onlytrade.app.login.data.user.table.UserTable
 import onlytrade.app.utils.BcryptUtils.hashPassword
+import onlytrade.app.viewmodel.login.repository.data.db.User
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.or
@@ -99,4 +99,14 @@ object UserRepository {
             table.phone eq phone
         } == 1
     }
+
+    private fun UserDAO.toModel(): User = User(
+        id = id.value,
+        name = usersName,
+        password = password,
+        phone = phone,
+        email = email,
+        verified = verified,
+        loggedIn = loggedIn
+    )
 }

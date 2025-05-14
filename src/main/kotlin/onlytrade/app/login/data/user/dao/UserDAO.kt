@@ -1,13 +1,13 @@
 package onlytrade.app.login.data.user.dao
 
 import onlytrade.app.login.data.user.table.UserTable
-import org.jetbrains.exposed.dao.IntEntity
-import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.LongEntity
+import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
 
-class UserDAO(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<UserDAO>(UserTable)
+class UserDAO(id: EntityID<Long>) : LongEntity(id) {
+    companion object : LongEntityClass<UserDAO>(UserTable)
 
     var usersName by UserTable.usersName
     var password by UserTable.password
