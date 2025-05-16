@@ -6,15 +6,11 @@ import onlytrade.app.db.suspendTransaction
 import onlytrade.app.offer.data.dao.OfferDao
 import onlytrade.app.offer.data.table.OfferTable
 import onlytrade.app.product.ProductRepository
-import onlytrade.app.utils.CustomBooleanOp
 import onlytrade.app.viewmodel.product.offer.repository.data.db.Offer
 import onlytrade.app.viewmodel.product.offer.repository.data.remote.request.AddOfferRequest
-import org.jetbrains.exposed.sql.Op
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.neq
 import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
 
@@ -89,35 +85,22 @@ object OfferRepository {
 
 
     suspend fun acceptOffer(id: Long) = suspendTransaction {
-        var productTraded = false
-        var deletedOffers = 0
         dao.findByIdAndUpdate(id) { offer ->
-            offer.accepted = true
             val offeredProducts = Json.decodeFromString<Set<Long>>(offer.offeredProductIds)
-            val tradedProductIds = offeredProducts + offer.offerReceiverProductId
-            val tradedProductIdsJson = Json.encodeToString(tradedProductIds)
-            var productTradedCount = 0
-            tradedProductIds.forEach { offeredProductId ->
-                if (productRepository.setTraded(offeredProductId)) {
-                    productTradedCount++
+            val tradeProductIds = offeredProducts + offer.offerReceiverProductId
+            if (productRepository.haveTraded(tradeProductIds)) {
+                dao.findById(offer.id)?.let {
+                    it.delete()
+                    exposedLogger.info("offer for id = ${it.id} not accepted and deleted because of other offers involving one or more traded products.")
                 }
+            } else {
+                val productTradedCount = productRepository.setTraded(tradeProductIds)
+                offer.accepted = productTradedCount == tradeProductIds.size
+                exposedLogger.info("Traded Product Count = $productTradedCount")
             }
-            deletedOffers = table.deleteWhere {
-                table.id neq offer.id and Op.build {
-                    val receiverCheck = "${table.offerReceiverProductId.name} = ANY ('{${
-                        tradedProductIds.joinToString(",")
-                    }}')"
-                    val offeredCheck =
-                        "${table.offeredProductIds.name}::jsonb && '$tradedProductIdsJson'::jsonb"
-                    CustomBooleanOp("($receiverCheck OR $offeredCheck)")
-                }
-
-            }
-            productTraded =
-                productTradedCount == offeredProducts.size && deletedOffers > 0
         }?.let {
-            exposedLogger.info("offer accepted = ${it.accepted} and deleted = $deletedOffers other offers involving traded products.")
-            it.accepted && productTraded
+            exposedLogger.info("offer accepted = ${it.accepted}")
+            it.accepted
         } ?: false
     }
 

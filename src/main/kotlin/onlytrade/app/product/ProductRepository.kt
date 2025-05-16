@@ -8,9 +8,11 @@ import onlytrade.app.viewmodel.product.repository.data.db.Product
 import onlytrade.app.viewmodel.product.repository.data.remote.request.AddProductRequest
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.update
 
 object ProductRepository {
     private val offerRepository = OfferRepository
@@ -19,12 +21,19 @@ object ProductRepository {
 
     fun getProductById(id: Long): Product? = dao.findById(id)?.let(::toModel)
 
-    fun setTraded(id: Long) = dao.findByIdAndUpdate(id) { product ->
-        product.traded = true
-    }?.let {
-        exposedLogger.info("Product Traded = ${it.traded}")
-        it.traded
-    } ?: false
+    /**
+     * Returns true if any of the ids are already traded.
+     */
+    fun haveTraded(ids: Set<Long>) =
+        table.selectAll().where(table.id inList ids and (table.traded eq true)).limit(1)
+            .any()
+
+    /**
+     * Batch update setting multiple products to traded.
+     */
+    fun setTraded(ids: Set<Long>): Int = table.update({ table.id inList ids }) {
+        it[traded] = true
+    }
 
     fun getProductsByIds(ids: Set<Long>) =
         dao.forIds(ids.toList()).map { dao ->
