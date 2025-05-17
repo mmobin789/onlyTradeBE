@@ -7,6 +7,7 @@ import onlytrade.app.utils.BcryptUtils.hashPassword
 import onlytrade.app.viewmodel.login.repository.data.db.User
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.exposedLogger
 import org.jetbrains.exposed.sql.or
 
 object UserRepository {
@@ -62,6 +63,14 @@ object UserRepository {
             this.phone = phone
             this.password = hashPassword(password)
         }.toModel()
+    }
+
+    suspend fun setUserDocs(id: Long, imageUrls: String) = suspendTransaction {
+        dao.findByIdAndUpdate(id) { user ->
+            user.docs = imageUrls
+        }?.also {
+            exposedLogger.info("Updated User doc urls =  ${it.docs}")
+        }
     }
 
     suspend fun setUserLoggedInByEmail(email: String) = suspendTransaction {

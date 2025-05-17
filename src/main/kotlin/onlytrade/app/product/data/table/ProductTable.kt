@@ -1,6 +1,8 @@
 package onlytrade.app.product.data.table
 
 import org.jetbrains.exposed.dao.id.LongIdTable
+import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 
 
 object ProductTable : LongIdTable(name = "product") {
@@ -13,4 +15,6 @@ object ProductTable : LongIdTable(name = "product") {
     val imageUrls = text("image_urls")
     val approved = bool("approved").default(false)
     val traded = bool("traded").default(false)
+    val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
+    val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
 }

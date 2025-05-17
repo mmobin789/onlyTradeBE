@@ -111,7 +111,7 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                     // ✅ Step 2: Upload images in parallel
                     val imageUrls = productImages.mapIndexed { index, bytes ->
                         async {
-                            val folderPath = ImageUploadService.buildImagePath(
+                            val folderPath = ImageUploadService.buildProductImagePath(
                                 userId = id,
                                 categoryId = addProductRequest!!.categoryId,
                                 subcategoryId = addProductRequest!!.subcategoryId,

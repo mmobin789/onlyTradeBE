@@ -9,19 +9,21 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.thymeleaf.ThymeleafContent
+import io.ktor.util.logging.Logger
 import onlytrade.app.login.data.JwtConfig.generateJWTToken
 import onlytrade.app.login.data.ui.LoginUi
 import onlytrade.app.login.data.user.UserRepository.addUserByEmail
 import onlytrade.app.login.data.user.UserRepository.addUserByPhone
 import onlytrade.app.login.data.user.UserRepository.findUserByEmail
 import onlytrade.app.login.data.user.UserRepository.findUserByPhone
+import onlytrade.app.login.data.user.route.userKyc
 import onlytrade.app.utils.BcryptUtils.checkPassword
 import onlytrade.app.viewmodel.login.repository.data.remote.model.request.EmailLoginRequest
 import onlytrade.app.viewmodel.login.repository.data.remote.model.request.PhoneLoginRequest
 import onlytrade.app.viewmodel.login.repository.data.remote.model.response.LoginResponse
 
 
-fun Route.loginRoutes() {
+fun Route.loginRoutes(log: Logger) {
 
     get("/") {
         call.respondRedirect("/login")
@@ -123,6 +125,8 @@ fun Route.loginRoutes() {
         }
 
     }
+
+    userKyc(log)
 }
 
 

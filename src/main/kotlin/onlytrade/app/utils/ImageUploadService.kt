@@ -10,22 +10,31 @@ import io.imagekit.sdk.models.FileCreateRequest
  */
 object ImageUploadService {
 
+    private val devEnv = System.getenv("BASE_URL").contains("-dev")
+
     private val imageKit = ImageKit.getInstance().apply {
         config = Configuration(
             "public_JbEOxy+vPRhChIBaX7ZaqHNR68s=",
             "private_X/R+XVvK1DCDVZM9JL7ugWPvqSI=",
-            "https://ik.imagekit.io/ywetwhs4e9/otdev/"
+            "https://ik.imagekit.io/ywetwhs4e9/${if (devEnv) "otdev" else "ot"}/"
         )
     }
 
-    fun buildImagePath(
+    fun buildProductImagePath(
         userId: Long,
         categoryId: Long,
         subcategoryId: Long,
         productId: Long
     ) = "${
-        if (System.getenv("BASE_URL").contains("-dev")) "dev" else "prod"
+        if (devEnv) "dev" else "prod"
     }/products/$userId/$categoryId/$subcategoryId/$productId"
+
+
+    fun buildUserImagePath(
+        userId: Long
+    ) = "${
+        if (devEnv) "dev" else "prod"
+    }/users/$userId/docs"
 
     fun uploadFile(
         name: String,
@@ -42,9 +51,9 @@ object ImageUploadService {
     }
 
     //todo test this
-    fun deleteAllProductImages() = try {
+    fun deleteImages(path: String) = try {
         imageKit.deleteFolder(DeleteFolderRequest().apply {
-            folderPath = "/products"
+            folderPath = path
         }).responseMetaData.httpStatusCode
     } catch (e: Exception) {
         e.printStackTrace()
