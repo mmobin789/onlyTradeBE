@@ -6,13 +6,14 @@ import onlytrade.app.product.data.dao.ProductDao
 import onlytrade.app.product.data.table.ProductTable
 import onlytrade.app.viewmodel.product.repository.data.db.Product
 import onlytrade.app.viewmodel.product.repository.data.remote.request.AddProductRequest
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.exposedLogger
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.exposedLogger
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.update
+
 
 object ProductRepository {
     private val offerRepository = OfferRepository
@@ -31,8 +32,8 @@ object ProductRepository {
     /**
      * Batch update setting multiple products to traded.
      */
-    fun setTraded(ids: Set<Long>): Int = table.update({ table.id inList ids }) {
-        it[traded] = true
+    fun setTraded(ids: Set<Long>): Int = table.update {
+        table.id inList ids
     }
 
     fun getProductsByIds(ids: Set<Long>) =

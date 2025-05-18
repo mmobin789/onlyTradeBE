@@ -5,10 +5,10 @@ import onlytrade.app.login.data.user.dao.UserDAO
 import onlytrade.app.login.data.user.table.UserTable
 import onlytrade.app.utils.BcryptUtils.hashPassword
 import onlytrade.app.viewmodel.login.repository.data.db.User
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.exposedLogger
-import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.exposedLogger
+import org.jetbrains.exposed.v1.core.or
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
 
 object UserRepository {
     private val dao = UserDAO

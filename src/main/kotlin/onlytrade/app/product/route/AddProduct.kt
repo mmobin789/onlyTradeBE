@@ -146,6 +146,15 @@ fun Route.addProduct(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                     )
                 )
             }
+        } ?: run {
+            val statusCode = HttpStatusCode.Unauthorized
+            call.respond(
+                statusCode,
+                AddProductResponse(
+                    statusCode = statusCode.value,
+                    error = statusCode.description
+                )
+            )
         }
     }
 }

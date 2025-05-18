@@ -8,11 +8,11 @@ import onlytrade.app.offer.data.table.OfferTable
 import onlytrade.app.product.ProductRepository
 import onlytrade.app.viewmodel.product.offer.repository.data.db.Offer
 import onlytrade.app.viewmodel.product.offer.repository.data.remote.request.AddOfferRequest
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.exposedLogger
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.v1.core.ResultRow
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.exposedLogger
+import org.jetbrains.exposed.v1.jdbc.selectAll
 
 object OfferRepository {
     private val table = OfferTable

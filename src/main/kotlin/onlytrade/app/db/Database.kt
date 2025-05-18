@@ -3,14 +3,14 @@ package onlytrade.app.db
 import io.ktor.server.application.Application
 import io.ktor.server.application.log
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import onlytrade.app.login.data.user.table.UserTable
 import onlytrade.app.offer.data.table.OfferTable
 import onlytrade.app.product.data.table.ProductTable
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.Transaction
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.core.Transaction
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.migration.MigrationUtils
 
 fun Application.configureDatabases() {
     val dbUrl = System.getenv("DATABASE_URL") ?: "jdbc:postgresql://localhost:5432/ot_dev"
@@ -25,9 +25,16 @@ fun Application.configureDatabases() {
     log.info("Connecting to DB: $dbUrl with user: $dbUser")
 
     transaction {
-        SchemaUtils.create(UserTable, ProductTable, OfferTable)
+        MigrationUtils.statementsRequiredForDatabaseMigration(UserTable, ProductTable, OfferTable)
+            .apply {
+                execInBatch(this)
+            }
     }
 }
 
 suspend fun <T> suspendTransaction(block: Transaction.() -> T): T =
-    newSuspendedTransaction(Dispatchers.IO, statement = block)
+    withContext(Dispatchers.IO) {
+        transaction {
+            block()
+        }
+    }

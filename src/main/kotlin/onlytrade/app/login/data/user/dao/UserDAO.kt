@@ -1,9 +1,9 @@
 package onlytrade.app.login.data.user.dao
 
 import onlytrade.app.login.data.user.table.UserTable
-import org.jetbrains.exposed.dao.LongEntity
-import org.jetbrains.exposed.dao.LongEntityClass
-import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.dao.LongEntity
+import org.jetbrains.exposed.v1.dao.LongEntityClass
 
 
 class UserDAO(id: EntityID<Long>) : LongEntity(id) {

@@ -112,6 +112,15 @@ fun Route.userKyc(log: Logger) = authenticate(JwtConfig.JWT_AUTH) {
                     )
                 )
             }
+        } ?: run {
+            val statusCode = HttpStatusCode.Unauthorized
+            call.respond(
+                statusCode,
+                KycResponse(
+                    statusCode = statusCode.value,
+                    error = statusCode.description
+                )
+            )
         }
     }
 }
