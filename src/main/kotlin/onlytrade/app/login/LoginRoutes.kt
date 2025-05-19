@@ -16,6 +16,7 @@ import onlytrade.app.login.data.user.UserRepository.addUserByEmail
 import onlytrade.app.login.data.user.UserRepository.addUserByPhone
 import onlytrade.app.login.data.user.UserRepository.findUserByEmail
 import onlytrade.app.login.data.user.UserRepository.findUserByPhone
+import onlytrade.app.login.data.user.route.getUserDetail
 import onlytrade.app.login.data.user.route.userKyc
 import onlytrade.app.utils.BcryptUtils.checkPassword
 import onlytrade.app.viewmodel.login.repository.data.remote.model.request.EmailLoginRequest
@@ -127,6 +128,7 @@ fun Route.loginRoutes(log: Logger) {
     }
 
     userKyc(log)
+    getUserDetail(log)
 }
 
 

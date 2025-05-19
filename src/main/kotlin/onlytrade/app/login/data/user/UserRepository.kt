@@ -116,6 +116,8 @@ object UserRepository {
         phone = phone,
         email = email,
         verified = verified,
-        loggedIn = loggedIn
+        docs = docs,
+        createdAt = createdAt.toString(),
+        updatedAt = updatedAt.toString(),
     )
 }

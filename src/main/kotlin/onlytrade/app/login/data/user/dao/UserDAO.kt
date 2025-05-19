@@ -16,5 +16,6 @@ class UserDAO(id: EntityID<Long>) : LongEntity(id) {
     var verified by UserTable.verified
     var loggedIn by UserTable.loggedIn
     var docs by UserTable.docs
+    var createdAt by UserTable.createdAt
     var updatedAt by UserTable.updatedAt
 }
